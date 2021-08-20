@@ -1,20 +1,34 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# gh-sync: Tool for pulling public issues into private tracking
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+## Prerequisites
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+- Windows 10
+- .NET 6 Preview 7 or later
+- A personal access token (PAT) for Azure DevOps
+- A personal access token (PAT) for GitHub
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+## Installing
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+```pwsh
+./install.ps1
+```
+
+On first use or when tokens expire, you will be prompted to provide each of your PATs.
+
+## Updating
+
+```pwsh
+git pull
+./install.ps1
+```
+
+## Using
+
+```shell
+# Create or update an ADO bug for microsoft/iqsharp#500.
+gh-sync pull-gh microsoft/iqsharp 500
+# Find existing ADO work item or bug for microsoft/iqsharp#500
+gh-sync find-ado microsoft/iqsharp 500
+# Show a text representation of AB#31795.
+gh-sync get-ado 31795
+```
