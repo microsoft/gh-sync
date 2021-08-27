@@ -6,6 +6,7 @@ using Patch = Microsoft.VisualStudio.Services.WebApi.Patch;
 using Octokit;
 using Microsoft.Win32;
 using Markdig.Renderers;
+using Spectre.Console;
 
 namespace gh_sync
 {
@@ -146,6 +147,7 @@ Work item: {workItem.Url}
                 }
                 else
                 {
+                    AnsiConsole.MarkupLine($"[bold yellow]Status of work item {workItem.ReadableLink()} not updated, as GitHub issue {issue.HtmlUrl} may be missing a triage label.[/]");
                     return workItem;
                 }
             });
@@ -196,19 +198,19 @@ Work item: {workItem.Url}
             {
                 return ("Active", "Approved");
             }
-            if (issue.IsLabeledAs("Resolved-Done"))
+            if (issue.IsLabeledAs("Resolution-Done"))
             {
                 return ("Closed", "Fixed and verified");
             }
-            else if (issue.IsLabeledAs("Resolved-Invalid"))
+            else if (issue.IsLabeledAs("Resolution-Invalid", "resolved: no action"))
             {
                 return ("Resolved", "Cannot Reproduce");
             }
-            else if (issue.IsLabeledAs("Resolved-Duplicate"))
+            else if (issue.IsLabeledAs("Resolution-Duplicate", "duplicate"))
             {
                 return ("Resolved", "Duplicate");
             }
-            else if (issue.IsLabeledAs("Resolved-WontFix"))
+            else if (issue.IsLabeledAs("Resolution-WontFix", "resolved: by design"))
             {
                 return ("Resolved", "As Designed");
             }

@@ -62,6 +62,8 @@ class Program
                     if (!options.DryRun)
                     {
                         await workItem.UpdateFromIssue(ghIssue);
+                        System.Console.WriteLine("Updating issue state...");
+                        await workItem.UpdateState(ghIssue);
                     }
                     else
                     {
