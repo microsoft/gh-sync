@@ -34,13 +34,15 @@ static class Ado
             try
             {
                 await connection.ConnectAsync();
+                adoConnection = connection;
                 return connection;
             } 
             catch (Exception ex)
             {
                 // Invalidate credential on failure.
                 Extensions.Invalidate(AdoPatName);
-                Console.Error.WriteLine($"Error authenticating to ADO: {ex}");
+                AnsiConsole.MarkupLine($"Error authenticating to ADO.");
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
             }
         }
     }
@@ -135,7 +137,7 @@ static class Ado
         );
 
         var nCommentsAdded = await newItem.UpdateCommentsFromIssue(issue).CountAsync();
-        System.Console.WriteLine($"Added {nCommentsAdded} comments from GitHub issue.");
+        AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
         return newItem;
     }
 

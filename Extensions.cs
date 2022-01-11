@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
 using Patch = Microsoft.VisualStudio.Services.WebApi.Patch;
@@ -7,6 +5,7 @@ using Octokit;
 using Microsoft.Win32;
 using Markdig.Renderers;
 using Spectre.Console;
+using System.Reflection;
 
 namespace gh_sync
 {
@@ -27,15 +26,14 @@ namespace gh_sync
             catch (Exception) {}
 
             
-            System.Console.WriteLine(prompt);
-            var response = (System.Console.ReadLine() ?? "").Trim();
+            var response = AnsiConsole.Ask<string>(prompt).Trim();
             Registry.SetValue("HKEY_CURRENT_USER\\" + KeyName, key, response);
             return response;
         }
 
         internal static void Invalidate(string key)
         {
-            System.Console.WriteLine($"[debug] Invalidating {KeyName}\\{key}.");
+            AnsiConsole.MarkupLine($"[debug] Invalidating {KeyName}\\{key}.");
             Registry.CurrentUser.OpenSubKey(KeyName, RegistryKeyPermissionCheck.ReadWriteSubTree)?.DeleteValue(key);
         }
 
@@ -59,40 +57,44 @@ namespace gh_sync
 
         internal static void WriteToConsole(this WorkItem workItem)
         {
-            System.Console.WriteLine($@"
-Work item: {workItem.Url}
+            var table = new Table();
+            table.AddColumns("", "");
+            table.HideHeaders();
 
-## Fields
-{string.Join("\n", 
-    workItem.Fields.Select(field =>
-        $"- {field.Key}: {field.Value}"
-    )
-)}
+            table.AddRow("Work Item", workItem.Url);
 
-{System.Text.Json.JsonSerializer.Serialize(workItem)}
+            var fields = new Table();
+            fields.AddColumns("Key", "Value");
+            foreach (var field in workItem.Fields)
+            {
+                fields.AddRow(field.Key.ToString(), field.Value?.ToString() ?? "");
+            }
+            table.AddRow(new Markup("Fields"), fields);
 
-## Relations
-{string.Join("\n",
-    (workItem.Relations ?? new List<WorkItemRelation>()).Select(rel =>
-    {
-        var attrs = rel.Attributes == null
-            ? string.Empty
-            : string.Join("",
-              rel.Attributes.Select(attr =>
-                  $"\n  - {attr.Key}: {attr.Value}"
-              )
-        );
-        return $"- {rel.Title} ({rel.Rel}): {rel.Url}{attrs}";
-    })
-)}
+            var relations = new Table();
+            relations.AddColumns("Title", "Rel", "Url", "Attributes");
+            foreach (var relation in workItem.Relations ?? new List<WorkItemRelation>())
+            {
+                var attrs = relation.Attributes == null
+                            ? string.Empty
+                            : string.Join("",
+                                relation.Attributes.Select(attr =>
+                                    $"\n  - {attr.Key}: {attr.Value}"
+                                )
+                            );
+                relations.AddRow(relation.Title, relation.Rel, relation.Url, attrs);
+            }
+            table.AddRow(new Markup("Relations"), relations);
 
-## Links
-{string.Join("\n",
-    workItem.Links.Links.Select(link =>
-        $"- {link.Key}: {link.Value.LinkToString()}"
-    )
-)}
-");
+            var links = new Table();
+            links.AddColumns("Key", "Value");
+            foreach (var link in workItem.Links.Links)
+            {
+                links.AddRow(link.Key, link.Value?.LinkToString() ?? "");
+            }
+            table.AddRow(new Markup("Links"), links);
+
+            AnsiConsole.Render(table);
         }
 
         internal static bool IsLabeledAs(this Issue issue, params string[] labels) =>
@@ -226,6 +228,27 @@ Work item: {workItem.Url}
 
         internal static async Task<TNewResult> Bind<TResult, TNewResult>(this Task<TResult> task, Func<TResult, TNewResult> continuation) =>
             continuation(await task);
+
+        internal static Issue AddRepoMetadata(this Issue issue, Repository repository)
+        {
+            // Workaround for https://github.com/octokit/octokit.net/issues/1616.
+            issue
+                .GetType()
+                .GetProperties(
+                    BindingFlags.Instance
+                    | BindingFlags.GetProperty
+                    | BindingFlags.SetProperty
+                    | BindingFlags.GetField
+                    | BindingFlags.SetField
+                    | BindingFlags.Public
+                    | BindingFlags.NonPublic
+                )
+                .Single(
+                    property => property.Name == "Repository"
+                )
+                .SetValue(issue, repository);
+            return issue!;
+        }
 
     }
 }

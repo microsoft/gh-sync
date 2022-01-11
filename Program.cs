@@ -1,17 +1,10 @@
-﻿using System;
-using System.CommandLine;
+﻿using System.CommandLine;
 using Octokit;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.Services.Common;
-using Microsoft.VisualStudio.Services.WebApi;
-using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
-using Microsoft.VisualStudio.Services.WebApi.Patch;
-using System.Diagnostics;
 using System.CommandLine.Invocation;
 using System.Reflection;
-using System.Linq;
+using System.CommandLine.Builder;
+using System.CommandLine.Parsing;
 
 namespace gh_sync;
 
@@ -47,49 +40,56 @@ class Program
 
         command.Handler = CommandHandler.Create<string, int, PullIssueOptions>(async (repo, issue, options) =>
         {
-            System.Console.WriteLine($"Getting GitHub issue {repo}#{issue}...");
+            AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
             var ghIssue = await GetGitHubIssue(repo, issue);
-
-            
-            // Check if there's already a work item.
-            var workItem = await GetAdoWorkItem(ghIssue);
-            if (workItem != null)
-            {
-                System.Console.WriteLine($"Found existing work item: {workItem.ReadableLink()}");
-                if (!options.AllowExisting)
-                {
-                    System.Console.WriteLine("Updating existing issue, since --allow-existing was not set.");
-                    if (!options.DryRun)
-                    {
-                        await workItem.UpdateFromIssue(ghIssue);
-                        System.Console.WriteLine("Updating issue state...");
-                        await workItem.UpdateState(ghIssue);
-                    }
-                    else
-                    {
-                        System.Console.WriteLine("Not updating new work item in ADO, as --dry-run was set.");
-                    }
-                    return;
-                }
-                System.Console.WriteLine("Creating new work item, since --allow-existing was set.");
-            }
-            // TODO: possibly update milestones, item type, etc.
-
-            if (!options.DryRun)
-            {
-                var newWorkItem = await Ado.PullWorkItemFromIssue(ghIssue);
-                await newWorkItem.UpdateState(ghIssue);
-                System.Console.WriteLine($@"Created new work item: {newWorkItem.ReadableLink()}");
-            }
-            else
-            {
-                System.Console.WriteLine("Not creating new work item in ADO, as --dry-run was set.");
-            }
+            await PullGitHubIssue(ghIssue, options.DryRun, options.AllowExisting);
         });
 
         return command;
 
     }
+
+    internal record PullAllIssueOptions(bool DryRun, bool AllowExisting);
+    private static Command PullAllIssuesCommand()
+    {
+
+        var command = new Command("pull-all-gh")
+        {
+            new Argument<string>(
+                "repo",
+                description: "GitHub repository to pull the issue from."
+            ),
+
+            new Option(
+                "--dry-run",
+                description: "Don't actually pull the GitHub issue into ADO."
+            ),
+
+            new Option(
+                "--allow-existing",
+                description: "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue."
+            )
+        };
+
+        command.Handler = CommandHandler.Create<string, PullAllIssueOptions>(async (repo, options) =>
+        {
+            await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
+                $"Getting all GitHub issues from {repo}...", async ctx =>
+                {
+                    var ghIssues = (await GetGitHubIssuesFromRepo(repo)).ToList();
+                    foreach (var issue in ghIssues)
+                    {
+                        ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
+                        await PullGitHubIssue(issue, options.DryRun, options.AllowExisting);
+                    }
+                    AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
+                });
+        });
+
+        return command;
+
+    }
+    
 
     private static Command GetAdoWorkItemCommand()
     {
@@ -131,16 +131,16 @@ class Program
 
         command.Handler = CommandHandler.Create<string, int>(async (repo, issue) =>
         {
-            System.Console.WriteLine($"Getting GitHub issue {repo}#{issue}...");
+            AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
             var ghIssue = await GetGitHubIssue(repo, issue);
             var workItem = await GetAdoWorkItem(ghIssue);
             if (workItem != null)
             {
-                System.Console.WriteLine($"Found existing work item: {workItem.ReadableLink()}");
+                AnsiConsole.MarkupLine($"Found existing work item: {workItem.ReadableLink()}");
             }
             else
             {
-                System.Console.WriteLine($"No ADO work item found for {repo}#{issue}.");
+                AnsiConsole.MarkupLine($"No ADO work item found for {repo}#{issue}.");
             }
         });
 
@@ -153,11 +153,48 @@ class Program
         var rootCommand = new RootCommand
         {
             PullIssueCommand(),
+            PullAllIssuesCommand(),
             GetAdoWorkItemCommand(),
             FindAdoWorkItemCommand()
         };
+        var attachOption = new Option("--attach", "Attaches a debugger before running.");
+        rootCommand.AddOption(attachOption);
 
-        return await rootCommand.InvokeAsync(args);
+        return await new CommandLineBuilder(rootCommand)
+            .UseMiddleware(async (context, next) =>
+            {
+                var attach = context.ParseResult.HasOption(attachOption) && context.ParseResult.ValueForOption<bool>(attachOption);
+                if (attach)
+                {
+                    System.Diagnostics.Debugger.Launch();
+                    System.Diagnostics.Debugger.Break();
+                }
+                await next(context);
+            })
+            .UseDefaults()
+            .Build()
+            .InvokeAsync(args);
+    }
+
+    static async Task<IEnumerable<Issue>> GetGitHubIssuesFromRepo(string repo)
+    {
+        var parts = repo.Split("/", 2);
+        var repository = await GitHub.WithClient(async client => await client.Repository.Get(parts[0], parts[1]));
+        var issues = await GitHub.WithClient(async client => await client.Issue.GetAllForRepository(
+            repositoryId: repository.Id,
+            new RepositoryIssueRequest
+            {
+                State = ItemStateFilter.All,
+                Filter = IssueFilter.All,
+            }
+        ));
+        return issues
+            .Where(issue => issue.PullRequest == null)
+            .Select(issue =>
+            {
+                var withRepo = issue.AddRepoMetadata(repository);
+                return withRepo;
+            });
     }
 
     static async Task<Issue> GetGitHubIssue(string repo, int id)
@@ -165,22 +202,7 @@ class Program
         var parts = repo.Split("/", 2);
         var repository = await GitHub.WithClient(async client => await client.Repository.Get(parts[0], parts[1]));
         var issue = await GitHub.WithClient(async client => await client.Issue.Get(repositoryId: repository.Id, id));
-        // Workaround for https://github.com/octokit/octokit.net/issues/1616.
-        issue
-            .GetType()
-            .GetProperties(
-                BindingFlags.Instance
-                | BindingFlags.GetProperty
-                | BindingFlags.SetProperty
-                | BindingFlags.GetField
-                | BindingFlags.SetField
-                | BindingFlags.Public
-                | BindingFlags.NonPublic
-            )
-            .Single(
-                property => property.Name == "Repository"
-            )
-            .SetValue(issue, repository);
+        issue.AddRepoMetadata(repository);
         return issue;
     }
 
@@ -194,21 +216,73 @@ class Program
     /// </returns>
     static async Task<WorkItem?> GetAdoWorkItem(Issue issue)
     {
-        var workItems = await Ado.WithWorkItemClient(async (client) =>
-            await client.QueryByWiqlAsync(
-                new Wiql
+        var escapedTitle = issue
+            .WorkItemTitle()
+            .Replace("\\", @"\\")
+            .Replace("\"", @"\""");
+        try
+        {
+            var workItems = await Ado.WithWorkItemClient(async (client) =>
+            {
+                return await client.QueryByWiqlAsync(
+                    new Wiql
+                    {
+                        Query = $@"
+                            SELECT [System.Id]
+                            FROM WorkItems
+                            WHERE ([Title] = ""{escapedTitle}"")
+                        "
+                    }
+                );
+            });
+            return workItems.WorkItems.SingleOrDefault() is {} workItemRef
+                    ? await Ado.WithWorkItemClient(client => client.GetWorkItemAsync(workItemRef.Id))
+                    : null;
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"Exception querying existing ADO items for \"{escapedTitle}\".");
+            AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+            return null;
+        }
+    }
+
+    private static async Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false)
+    {
+        // Check if there's already a work item.
+        var workItem = await GetAdoWorkItem(ghIssue);
+        if (workItem != null)
+        {
+            AnsiConsole.MarkupLine($"Found existing work item: {workItem.ReadableLink()}");
+            if (!allowExisting)
+            {
+                AnsiConsole.MarkupLine("Updating existing issue, since --allow-existing was not set.");
+                if (!dryRun)
                 {
-                    Query = $@"
-                        SELECT [System.Id]
-                        FROM WorkItems
-                        WHERE ([Title] = '{issue.WorkItemTitle()}')
-                    "
+                    await workItem.UpdateFromIssue(ghIssue);
+                    AnsiConsole.MarkupLine("Updating issue state...");
+                    await workItem.UpdateState(ghIssue);
                 }
-            )
-        );
-        return workItems.WorkItems.SingleOrDefault() is {} workItemRef
-                ? await Ado.WithWorkItemClient(client => client.GetWorkItemAsync(workItemRef.Id))
-                : null;
+                else
+                {
+                    AnsiConsole.MarkupLine("Not updating new work item in ADO, as --dry-run was set.");
+                }
+                return;
+            }
+            AnsiConsole.MarkupLine("Creating new work item, since --allow-existing was set.");
+        }
+        // TODO: possibly update milestones, item type, etc.
+
+        if (!dryRun)
+        {
+            var newWorkItem = await Ado.PullWorkItemFromIssue(ghIssue);
+            await newWorkItem.UpdateState(ghIssue);
+            AnsiConsole.MarkupLine($@"Created new work item: {newWorkItem.ReadableLink()}");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("Not creating new work item in ADO, as --dry-run was set.");
+        }
     }
 
     // The following comments came from attempts to use WIQL to search for

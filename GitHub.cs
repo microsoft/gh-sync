@@ -30,21 +30,22 @@ static class GitHub
                 var currentUser = await ghClient.User.Current();
                 if (currentUser is User user && !string.IsNullOrWhiteSpace(user.Login))
                 {
-                    System.Console.WriteLine($"Using GitHub as {user.Login}.");
+                    AnsiConsole.MarkupLine($"Using GitHub as {user.Login}.");
                     return ghClient;
                 }
                 else
                 {
                     // Invalidate credential on failure.
                     Extensions.Invalidate(GHPatName);
-                    System.Console.WriteLine($"No error authenticating to GitHub, but user was null.");
+                    AnsiConsole.MarkupLine($"No error authenticating to GitHub, but user was null.");
                 }
             }
             catch (Exception ex)
             {
                 // Invalidate credential on failure.
                 Extensions.Invalidate(GHPatName);
-                Console.Error.WriteLine($"Error authenticating to GitHub: {ex}");
+                AnsiConsole.MarkupLine($"Error authenticating to GitHub.");
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
             }
         }
     }
