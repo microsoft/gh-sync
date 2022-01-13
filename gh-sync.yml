@@ -13,6 +13,15 @@ steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 
+# Azure Key Vault
+# Download Azure Key Vault secrets
+- task: AzureKeyVault@2
+  inputs:
+    connectedServiceName: 916dfd6d-030c-4bd9-b579-7bb6d1926e97 # Azure subscription
+    keyVaultName: qdk-ado-github-sync-kv # Name of existing key vault
+    secretsFilter: '*' # Downloads all secrets for the key vault
+    runAsPreJob: true # Runs before the job starts
+
 - script: |
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
