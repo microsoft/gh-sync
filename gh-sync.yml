@@ -7,7 +7,7 @@ trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-latest
 
 steps:
 - script: echo Hello, world!
@@ -24,3 +24,4 @@ steps:
 
 - script: |
     gh-sync pull-gh microsoft/iqsharp 567 --dry-run
+  displayName: 'Run script'
