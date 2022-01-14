@@ -20,8 +20,6 @@ steps:
 
 - pwsh: |
     ./install.ps1
-  displayName: 'Install script'
-
-- script: |
     gh-sync pull-gh microsoft/iqsharp 567 --dry-run
-  displayName: 'Run script'
+  displayName: 'Install and run script'
+  workingDirectory: $(System.DefaultWorkingDirectory)
