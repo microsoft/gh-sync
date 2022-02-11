@@ -19,18 +19,9 @@ steps:
     installationPath: $(Agent.ToolsDirectory)/dotnet
     
 - task: PowerShell@2
-  displayName: 'Install script'
-  inputs:
-    filePath: './install.ps1'
-
-- task: PowerShell@2
-  displayName: 'Build project'
+  displayName: 'Install and run'
   inputs:
     targetType: 'inline'
-    script: 'dotnet build'
-
-- task: PowerShell@2
-  displayName: 'Run gh-sync'
-  inputs:
-    targetType: 'inline'
-    script: 'dotnet run gh-sync pull-gh microsoft/iqsharp 567 --dry-run'
+    script: |
+      ./install.ps1
+      gh-sync pull-gh microsoft/iqsharp 567 --dry-run
