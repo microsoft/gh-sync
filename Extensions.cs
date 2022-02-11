@@ -33,7 +33,7 @@ namespace gh_sync
 
         internal static void Invalidate(string key)
         {
-            AnsiConsole.MarkupLine($"[debug] Invalidating {KeyName}\\{key}.");
+            AnsiConsole.MarkupLine($"[[debug]] Invalidating {KeyName}\\{key}.");
             Registry.CurrentUser.OpenSubKey(KeyName, RegistryKeyPermissionCheck.ReadWriteSubTree)?.DeleteValue(key);
         }
 
