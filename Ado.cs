@@ -10,7 +10,7 @@ namespace gh_sync;
 
 static class Ado
 {
-    internal const string AdoPatName = "ado-pat";
+    internal const string ADOTokenName = "ado-token";
     private const string collectionUri = "https://ms-quantum.visualstudio.com";
 
     internal const string ProjectName = "Quantum Program";
@@ -25,11 +25,8 @@ static class Ado
 
         while (true)
         {
-            var pat = Extensions.RetreiveOrPrompt(
-                AdoPatName,
-                prompt: "Please provide a PAT for use with ADO: "
-            );
-            var creds = new VssBasicCredential(string.Empty, pat);
+            var ADOToken = Environment.GetEnvironmentVariable("ADOToken");
+            var creds = new VssBasicCredential(string.Empty, ADOToken);
             var connection = new VssConnection(new Uri(collectionUri), creds);
             try
             {
@@ -40,7 +37,7 @@ static class Ado
             catch (Exception ex)
             {
                 // Invalidate credential on failure.
-                Extensions.Invalidate(AdoPatName);
+                Extensions.Invalidate(ADOTokenName);
                 AnsiConsole.MarkupLine($"Error authenticating to ADO.");
                 AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
             }

@@ -4,7 +4,7 @@ namespace gh_sync;
 
 static class GitHub
 {
-    private const string GHPatName = "gh-pat";
+    private const string GHTokenName = "gh-token";
 
     private static GitHubClient? ghClient = null;
     internal static async Task<GitHubClient> GetClient()
@@ -16,11 +16,8 @@ static class GitHub
 
         while (true)
         {
-            var pat = Extensions.RetreiveOrPrompt(
-                GHPatName,
-                prompt: "Please provide a PAT for use with GitHub: "
-            );
-            var tokenAuth = new Credentials(pat);
+            var GHToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+            var tokenAuth = new Credentials(GHToken);
             try
             {
                 ghClient = new GitHubClient(new ProductHeaderValue("ms-quantum-gh-sync"))
@@ -36,14 +33,14 @@ static class GitHub
                 else
                 {
                     // Invalidate credential on failure.
-                    Extensions.Invalidate(GHPatName);
+                    Extensions.Invalidate(GHTokenName);
                     AnsiConsole.MarkupLine($"No error authenticating to GitHub, but user was null.");
                 }
             }
             catch (Exception ex)
             {
                 // Invalidate credential on failure.
-                Extensions.Invalidate(GHPatName);
+                Extensions.Invalidate(GHTokenName);
                 AnsiConsole.MarkupLine($"Error authenticating to GitHub.");
                 AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
             }
