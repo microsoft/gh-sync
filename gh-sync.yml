@@ -20,15 +20,10 @@ steps:
 
 - task: AzureKeyVault@1
   inputs:
-    azureSubscription: 'AzureRM / Solid'
+    azureSubscription: 'QuArC Internal Consumption'
     KeyVaultName: 'kv-qdk-build'
     SecretsFilter: 'GitHubPAT'
     RunAsPreJob: false
-
-- pwsh: ./set-env.ps1
-  displayName: "Set environment variables"
-  env:
-    GITHUB_TOKEN: $(GitHubPAT)
     
 - task: PowerShell@2
   displayName: 'Install and run'
@@ -37,3 +32,5 @@ steps:
     script: |
       ./install.ps1
       gh-sync pull-gh microsoft/iqsharp 567 --dry-run
+  env:
+    GITHUB_PAT: $(GitHubPAT)
