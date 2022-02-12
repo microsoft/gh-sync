@@ -17,6 +17,18 @@ steps:
     packageType: sdk
     version: 6.0.101
     installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: AzureKeyVault@1
+  inputs:
+    azureSubscription: 'AzureRM / Solid'
+    KeyVaultName: 'kv-qdk-build'
+    SecretsFilter: 'GitHubPAT'
+    RunAsPreJob: false
+
+- pwsh: ./set-env.ps1
+  displayName: "Set environment variables"
+  env:
+    GITHUB_TOKEN: $(GitHubPAT)
     
 - task: PowerShell@2
   displayName: 'Install and run'
