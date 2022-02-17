@@ -23,5 +23,9 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
+      Write-Host "##### Listing environment variables #####"
+      ls env:
+      Write-Host "##### Installing script #####"
       ./install.ps1
+      Write-Host "##### Running gh-sync #####"
       gh-sync pull-gh microsoft/iqsharp 567 --dry-run
