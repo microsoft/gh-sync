@@ -17,13 +17,6 @@ steps:
     packageType: sdk
     version: 6.0.101
     installationPath: $(Agent.ToolsDirectory)/dotnet
-
-- task: AzureKeyVault@1
-  inputs:
-    azureSubscription: 'QuArC Internal Consumption'
-    KeyVaultName: 'kv-qdk-build'
-    SecretsFilter: 'GitHubPAT'
-    RunAsPreJob: false
     
 - task: PowerShell@2
   displayName: 'Install and run'
@@ -32,5 +25,3 @@ steps:
     script: |
       ./install.ps1
       gh-sync pull-gh microsoft/iqsharp 567 --dry-run
-  env:
-    GITHUB_PAT: $(GitHubPAT)
