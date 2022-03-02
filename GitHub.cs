@@ -16,7 +16,11 @@ static class GitHub
 
         while (true)
         {
-            var GHToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+            var GHToken = Extensions.RetreiveOrPrompt(
+                GHTokenName,
+                prompt: "Please provide a PAT for use with GitHub: ",
+                envVarName: "GITHUB_TOKEN"
+            );
             var tokenAuth = new Credentials(GHToken);
             try
             {

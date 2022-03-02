@@ -13,8 +13,22 @@ namespace gh_sync
     internal static class Extensions
     {
         internal static string KeyName = @"Software\gh-sync";
-        internal static string RetreiveOrPrompt(string key, string prompt)
+        
+        /// <param name="envVarName">
+        ///     If not <c>null</c>, will use the given environment variable in
+        ///     preference to the given registry key.
+        /// </param>
+        internal static string RetreiveOrPrompt(string key, string prompt, string? envVarName = null)
         {
+            if (envVarName != null)
+            {
+                var env = Environment.GetEnvironmentVariable(envVarName);
+                if (!string.IsNullOrWhiteSpace(env))
+                {
+                    return env;
+                }
+            }
+
             try
             {
                 var creds = Registry.GetValue("HKEY_CURRENT_USER\\" + KeyName, key, null);
@@ -34,7 +48,20 @@ namespace gh_sync
         internal static void Invalidate(string key)
         {
             AnsiConsole.MarkupLine($"[[debug]] Invalidating {KeyName}\\{key}.");
-            Registry.CurrentUser.OpenSubKey(KeyName, RegistryKeyPermissionCheck.ReadWriteSubTree)?.DeleteValue(key);
+            try
+            {
+                var subkey = Registry.CurrentUser.OpenSubKey(KeyName, RegistryKeyPermissionCheck.ReadWriteSubTree);
+                if (subkey == null)
+                {
+                    AnsiConsole.MarkupLine($"[yellow] Registry key {KeyName}\\{key} does not exist.[/yellow]");
+                }
+                subkey?.DeleteValue(key);
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Exception when invalidating old credentials.[/red]");
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+            }
         }
 
         internal static string ReadableLink(this WorkItem workItem) =>
@@ -67,7 +94,7 @@ namespace gh_sync
             fields.AddColumns("Key", "Value");
             foreach (var field in workItem.Fields)
             {
-                fields.AddRow(field.Key.ToString(), field.Value?.ToString() ?? "");
+                fields.AddRow(field.Key.ToString(), field.Value?.ToString()?.Replace("[", "[[")?.Replace("]", "]]") ?? "");
             }
             table.AddRow(new Markup("Fields"), fields);
 

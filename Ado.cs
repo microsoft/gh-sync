@@ -25,7 +25,11 @@ static class Ado
 
         while (true)
         {
-            var ADOToken = Environment.GetEnvironmentVariable("ADO_TOKEN");
+            var ADOToken = Extensions.RetreiveOrPrompt(
+                ADOTokenName,
+                prompt: "Please provide a PAT for use with Azure DevOps: ",
+                envVarName: "ADO_TOKEN"
+            );
             var creds = new VssBasicCredential(string.Empty, ADOToken);
             var connection = new VssConnection(new Uri(collectionUri), creds);
             try
