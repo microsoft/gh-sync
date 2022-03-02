@@ -19,17 +19,11 @@ steps:
     installationPath: $(Agent.ToolsDirectory)/dotnet
     
 - task: PowerShell@2
-  displayName: 'Install'
+  displayName: 'Install and Run'
   inputs:
     targetType: 'inline'
     script: |
       ./install.ps1
-
-- task: PowerShell@2
-  displayName: 'Run'
-  inputs:
-    targetType: 'inline'
-    script: |
       gh-sync pull-all-gh microsoft/quantumkatas --dry-run
   env:
     ADO_TOKEN: $(ADO_TOKEN)
