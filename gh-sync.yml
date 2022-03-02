@@ -10,7 +10,6 @@ pool:
   vmImage: windows-latest
 
 steps:
-
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk'
   inputs:
@@ -23,6 +22,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
+      Write-Host "Test value: $(repoName)"
       ./install.ps1
       gh-sync pull-all-gh microsoft/quantumkatas --dry-run
   env:
