@@ -33,3 +33,6 @@ steps:
     targetType: 'inline'
     script: |
       gh-sync pull-all-gh microsoft/quantumkatas --dry-run
+  env:
+    ADO_TOKEN: $(ADO_TOKEN)
+    GITHUB_TOKEN: $(GITHUB_TOKEN)
