@@ -19,13 +19,17 @@ steps:
     installationPath: $(Agent.ToolsDirectory)/dotnet
     
 - task: PowerShell@2
-  displayName: 'Install and run'
+  displayName: 'Install'
   inputs:
     targetType: 'inline'
     script: |
-      Write-Host "##### Listing environment variables #####"
-      ls env:
-      Write-Host "##### Installing script #####"
       ./install.ps1
       Write-Host "##### Running gh-sync #####"
       gh-sync pull-gh microsoft/iqsharp 567 --dry-run
+
+- task: PowerShell@2
+  displayName: 'Run'
+  inputs:
+    targetType: 'inline'
+    script: |
+      gh-sync pull-all-gh microsoft/quantumkatas --dry-run
