@@ -24,8 +24,6 @@ steps:
     targetType: 'inline'
     script: |
       ./install.ps1
-      Write-Host "##### Running gh-sync #####"
-      gh-sync pull-gh microsoft/iqsharp 567 --dry-run
 
 - task: PowerShell@2
   displayName: 'Run'
