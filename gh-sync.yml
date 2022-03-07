@@ -18,7 +18,7 @@ steps:
     targetType: 'inline'
     script: |
       ./install.ps1
-      gh-sync pull-all-gh microsoft/QuantumKatas --dry-run
+      gh-sync pull-all-gh microsoft/$(repoName) --dry-run
   env:
     ADO_TOKEN: $(ADO_TOKEN)
     GITHUB_TOKEN: $(GITHUB_TOKEN)
