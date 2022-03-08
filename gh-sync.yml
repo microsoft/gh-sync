@@ -25,7 +25,7 @@ steps:
     targetType: 'inline'
     script: |
       ./install.ps1
-      gh-sync pull-all-gh microsoft/$(repoName) --dry-run
+      gh-sync pull-gh microsoft/$(repoName) $(issueNumber) --dry-run
   env:
     ADO_TOKEN: $(ADO_TOKEN)
     GITHUB_TOKEN: $(GitHubPAT)
