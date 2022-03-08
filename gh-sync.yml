@@ -21,4 +21,4 @@ steps:
       gh-sync pull-gh microsoft/$(repoName) $(issueNumber) --dry-run
   env:
     ADO_TOKEN: $(ADO_TOKEN)
-    GITHUB_TOKEN: $(GitHubPAT)
+    GITHUB_TOKEN: $(GITHUB_TOKEN)
