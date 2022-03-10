@@ -12,12 +12,12 @@ steps:
     version: 6.0.101
     installationPath: $(Agent.ToolsDirectory)/dotnet
     
-- task: AzureKeyVault@1
-  inputs:
-    azureSubscription: 'AzureRM / Solid'
-    KeyVaultName: 'kv-qdk-build'
-    SecretsFilter: 'GitHubPAT'
-    RunAsPreJob: false
+# - task: AzureKeyVault@1
+#   inputs:
+#     azureSubscription: 'AzureRM / Solid'
+#     KeyVaultName: 'kv-qdk-build'
+#     SecretsFilter: 'GitHubPAT'
+#     RunAsPreJob: false
     
 - task: PowerShell@2
   displayName: 'Install and Run'
@@ -28,4 +28,4 @@ steps:
       gh-sync pull-gh microsoft/$(repoName) $(issueNumber) --dry-run
   env:
     ADO_TOKEN: $(ADO_TOKEN)
-    GITHUB_TOKEN: $(GitHubPAT)
+    GITHUB_TOKEN: $(GITHUB_TOKEN)
