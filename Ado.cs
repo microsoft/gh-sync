@@ -11,12 +11,23 @@ namespace gh_sync;
 static class Ado
 {
     internal const string ADOTokenName = "ado-token";
-    private const string collectionUri = "https://ms-quantum.visualstudio.com";
+    internal const string ADOUriName = "ado-uri";
+    internal const string ADOProjectName = "ado-project";
 
-    internal const string ProjectName = "Quantum Program";
+    internal static readonly string CollectionUri = Extensions.RetreiveOrPrompt(
+        ADOUriName,
+        prompt: "Please provide a URI for your ADO organization: ",
+        envVarName: "ADO_URI"
+    );
+    internal static readonly string ProjectName = Extensions.RetreiveOrPrompt(
+        ADOUriName,
+        prompt: "Please provide a URI for your ADO organization: ",
+        envVarName: "ADO_PROJECT"
+    );
 
     private static VssConnection? adoConnection = null;
     private static async Task<VssConnection> GetAdoConnection()
+    
     {
         if (adoConnection != null)
         {
@@ -30,8 +41,10 @@ static class Ado
                 prompt: "Please provide a PAT for use with Azure DevOps: ",
                 envVarName: "ADO_TOKEN"
             );
+
             var creds = new VssBasicCredential(string.Empty, ADOToken);
-            var connection = new VssConnection(new Uri(collectionUri), creds);
+            var connection = new VssConnection(new Uri(CollectionUri), creds);
+            
             try
             {
                 await connection.ConnectAsync();
