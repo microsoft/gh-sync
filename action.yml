@@ -1,0 +1,31 @@
+name: 'gh-sync'
+description: 'The description of your GitHub Action'
+branding:
+  icon: activity
+  color: orange
+inputs:
+  ado-project-url:
+    description: TODO
+    required: true
+  repository:
+    description: TODO
+    required: true
+  issue-number:
+    description: TODO
+    required: true
+  ado-token:
+    description: TODO
+    required: true
+  gh-token:
+    description: TODO
+    required: true
+outputs: {}
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args: # TODO
+  - ${{ inputs.ado-project-url }}
+  - ${{ inputs.repository }}
+  - ${{ inputs.issue-number }}
+  - ${{ inputs.ado-token }}
+  - ${{ inputs.gh-token }}
