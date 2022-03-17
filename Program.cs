@@ -203,10 +203,16 @@ class Program
     static async Task<Issue> GetGitHubIssue(string repo, int id)
     {
         var parts = repo.Split("/", 2);
-        var repository = await GitHub.WithClient(async client => await client.Repository.Get(parts[0], parts[1]));
-        var issue = await GitHub.WithClient(async client => await client.Issue.Get(repositoryId: repository.Id, id));
-        issue.AddRepoMetadata(repository);
-        return issue;
+        return await GitHub.WithClient(async client =>
+        {
+            AnsiConsole.WriteLine("[grey]Got GitHub client.[/]");
+            var repository = await client.Repository.Get(parts[0], parts[1]);
+            AnsiConsole.WriteLine($"[grey]Got repository: {repository.HtmlUrl}.[/]");
+            var issue = await client.Issue.Get(repositoryId: repository.Id, id);
+            AnsiConsole.WriteLine($"[grey]Got issue: {issue.HtmlUrl}.[/]");
+            issue.AddRepoMetadata(repository);
+            return issue;
+        });
     }
 
     /// <summary>
