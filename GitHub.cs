@@ -28,20 +28,21 @@ static class GitHub
                 {
                     Credentials = tokenAuth
                 };
-                var currentUser = await ghClient.User.Current();
+                // var currentUser = await ghClient.User.Current();
                 // AnsiConsole.MarkupLine($"currentUser: {currentUser}.");
                 // AnsiConsole.MarkupLine($"user.Login: {user.Login}.");
-                if (currentUser is User user && !string.IsNullOrWhiteSpace(user.Login))
-                {
-                    AnsiConsole.MarkupLine($"Using GitHub as {user.Login}.");
-                    return ghClient;
-                }
-                else
-                {
-                    // Invalidate credential on failure.
-                    Extensions.Invalidate(GHTokenName);
-                    AnsiConsole.MarkupLine($"No error authenticating to GitHub, but user was null.");
-                }
+                // ghClient.
+                // if (currentUser is User user && !string.IsNullOrWhiteSpace(user.Login))
+                // {
+                //     AnsiConsole.MarkupLine($"Using GitHub as {user.Login}.");
+                //     return ghClient;
+                // }
+                // else
+                // {
+                //     // Invalidate credential on failure.
+                //     Extensions.Invalidate(GHTokenName);
+                //     AnsiConsole.MarkupLine($"No error authenticating to GitHub, but user was null.");
+                // }
             }
             catch (Exception ex)
             {
