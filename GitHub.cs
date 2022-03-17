@@ -29,8 +29,8 @@ static class GitHub
                     Credentials = tokenAuth
                 };
                 var currentUser = await ghClient.User.Current();
-                AnsiConsole.MarkupLine($"currentUser: {currentUser}.");
-                AnsiConsole.MarkupLine($"user.Login: {user.Login}.");
+                // AnsiConsole.MarkupLine($"currentUser: {currentUser}.");
+                // AnsiConsole.MarkupLine($"user.Login: {user.Login}.");
                 if (currentUser is User user && !string.IsNullOrWhiteSpace(user.Login))
                 {
                     AnsiConsole.MarkupLine($"Using GitHub as {user.Login}.");

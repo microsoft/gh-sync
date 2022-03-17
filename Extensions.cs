@@ -53,13 +53,13 @@ namespace gh_sync
                 var subkey = Registry.CurrentUser.OpenSubKey(KeyName, RegistryKeyPermissionCheck.ReadWriteSubTree);
                 if (subkey == null)
                 {
-                    AnsiConsole.MarkupLine($"[yellow] Registry key {KeyName}\\{key} does not exist.[/yellow]");
+                    AnsiConsole.MarkupLine($"[yellow] Registry key {KeyName}\\{key} does not exist.[/]");
                 }
                 subkey?.DeleteValue(key);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Exception when invalidating old credentials.[/red]");
+                AnsiConsole.MarkupLine($"[red]Exception when invalidating old credentials.[/]");
                 AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
             }
         }
