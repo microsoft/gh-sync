@@ -10,4 +10,5 @@ RUN dotnet publish ./gh-sync.csproj -c Release -o out
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
 COPY --from=build-env /app/out .
 COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
