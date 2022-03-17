@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 export ADO_PROJECT=$1
 export GH_REPO=$2

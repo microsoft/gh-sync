@@ -11,4 +11,4 @@ FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine
 COPY --from=build-env /app/out .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
