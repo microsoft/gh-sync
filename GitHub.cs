@@ -28,6 +28,13 @@ static class GitHub
                 {
                     Credentials = tokenAuth
                 };
+                // Try to use the client for something trivial so as to prompt
+                // a failure as early as possible.
+                var orgProfile = await ghClient.Organization.Get("microsoft");
+                if (orgProfile == null)
+                {
+                    AnsiConsole.WriteLine("[yellow]Unable to fetch public profiles; something may have gone wrong with auth. Please check logs carefully.[/]");
+                }
                 // var currentUser = await ghClient.User.Current();
                 // AnsiConsole.MarkupLine($"currentUser: {currentUser}.");
                 // AnsiConsole.MarkupLine($"user.Login: {user.Login}.");
