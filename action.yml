@@ -7,6 +7,9 @@ inputs:
   ado-project-url:
     description: TODO
     required: true
+  ado-collection-url:
+    description: TODO
+    required: true
   repository:
     description: TODO
     required: true
@@ -29,3 +32,4 @@ runs:
   - ${{ inputs.issue-number }}
   - ${{ inputs.ado-token }}
   - ${{ inputs.gh-token }}
+  - ${{ inputs.ado-collection-url }}
