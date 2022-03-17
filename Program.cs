@@ -205,11 +205,11 @@ class Program
         var parts = repo.Split("/", 2);
         return await GitHub.WithClient(async client =>
         {
-            AnsiConsole.WriteLine("[grey]Got GitHub client.[/]");
+            AnsiConsole.MarkupLine("[grey]Got GitHub client.[/]");
             var repository = await client.Repository.Get(parts[0], parts[1]);
-            AnsiConsole.WriteLine($"[grey]Got repository: {repository.HtmlUrl}.[/]");
+            AnsiConsole.MarkupLine($"[grey]Got repository: {repository.HtmlUrl}.[/]");
             var issue = await client.Issue.Get(repositoryId: repository.Id, id);
-            AnsiConsole.WriteLine($"[grey]Got issue: {issue.HtmlUrl}.[/]");
+            AnsiConsole.MarkupLine($"[grey]Got issue: {issue.HtmlUrl}.[/]");
             issue.AddRepoMetadata(repository);
             return issue;
         });

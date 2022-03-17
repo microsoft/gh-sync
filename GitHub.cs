@@ -33,12 +33,13 @@ static class GitHub
                 var orgProfile = await ghClient.Organization.Get("microsoft");
                 if (orgProfile is Organization profile)
                 {
-                    AnsiConsole.WriteLine("[green]Got profile OK![/]");
+                    AnsiConsole.MarkupLine("[green]Got profile OK![/]");
                 }
                 else
                 {
-                    AnsiConsole.WriteLine("[yellow]Unable to fetch public profiles; something may have gone wrong with auth. Please check logs carefully.[/]");
+                    AnsiConsole.MarkupLine("[yellow]Unable to fetch public profiles; something may have gone wrong with auth. Please check logs carefully.[/]");
                 }
+                return ghClient;
                 // var currentUser = await ghClient.User.Current();
                 // AnsiConsole.MarkupLine($"currentUser: {currentUser}.");
                 // AnsiConsole.MarkupLine($"user.Login: {user.Login}.");
