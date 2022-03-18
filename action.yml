@@ -23,9 +23,9 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - ${{ inputs.ado-collection-url }}
     - ${{ inputs.ado-project-url }}
     - ${{ inputs.github-repo }}
     - ${{ inputs.issue-number }}
     - ${{ inputs.ado-token }}
     - ${{ inputs.github-token }}
-    - ${{ inputs.ado-collection-url }}
