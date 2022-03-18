@@ -33,31 +33,30 @@ static class Ado
             return adoConnection;
         }
 
-        while (true)
-        {
-            var ADOToken = Extensions.RetreiveOrPrompt(
-                ADOTokenName,
-                prompt: "Please provide a PAT for use with Azure DevOps: ",
-                envVarName: "ADO_TOKEN"
-            );
+        var ADOToken = Extensions.RetreiveOrPrompt(
+            ADOTokenName,
+            prompt: "Please provide a PAT for use with Azure DevOps: ",
+            envVarName: "ADO_TOKEN"
+        );
 
-            var creds = new VssBasicCredential(string.Empty, ADOToken);
-            var connection = new VssConnection(new Uri(CollectionUri), creds);
-            
-            try
-            {
-                await connection.ConnectAsync();
-                adoConnection = connection;
-                return connection;
-            } 
-            catch (Exception ex)
-            {
-                // Invalidate credential on failure.
-                Extensions.Invalidate(ADOTokenName);
-                AnsiConsole.MarkupLine($"Error authenticating to ADO.");
-                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-            }
+        var creds = new VssBasicCredential(string.Empty, ADOToken);
+        var connection = new VssConnection(new Uri(CollectionUri), creds);
+        
+        try
+        {
+            await connection.ConnectAsync();
+            adoConnection = connection;
+            return connection;
+        } 
+        catch (Exception ex)
+        {
+            // Invalidate credential on failure.
+            Extensions.Invalidate(ADOTokenName);
+            AnsiConsole.MarkupLine($"Error authenticating to ADO.");
+            AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
         }
+
+        throw new AuthorizationException();
     }
 
     internal static Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation) =>
