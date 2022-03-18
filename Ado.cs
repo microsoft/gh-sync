@@ -12,16 +12,15 @@ static class Ado
 {
     internal const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
-    internal const string ADOProjectName = "ado-project";
 
     internal static readonly string CollectionUri = Extensions.RetreiveOrPrompt(
         ADOUriName,
-        prompt: "Please provide a URI for your ADO organization: ",
+        prompt: "Please provide a URI for your ADO project organization: ",
         envVarName: "ADO_URI"
     );
     internal static readonly string ProjectName = Extensions.RetreiveOrPrompt(
         ADOUriName,
-        prompt: "Please provide a URI for your ADO organization: ",
+        prompt: "Please provide a URI for your ADO project organization: ",
         envVarName: "ADO_PROJECT"
     );
 
