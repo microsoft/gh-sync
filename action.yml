@@ -1,35 +1,31 @@
-name: 'gh-sync'
-description: 'The description of your GitHub Action'
-branding:
-  icon: activity
-  color: orange
+name: 'gh-sync Action'
+description: 'Run gh-sync to synchronize GitHub issues with ADO tracking'
 inputs:
   ado-project-url:
-    description: TODO
+    description: 'Fully qualified URL to the Azure DevOps organization including the project name (e.g. https://dev.azure.com/organization/project-name)'
     required: true
   ado-collection-url:
-    description: TODO
+    description: 'Fully qualified URL to the Azure Devops organization (e.g. https://dev.azure.com/organization/)'
     required: true
-  repository:
-    description: TODO
+  github-repo:
+    description: 'The full GitHub repository path (e.g. microsoft/QuantumKatas)'
     required: true
   issue-number:
-    description: TODO
+    description: 'The issue number supplied from the triggered GitHub workflow'
     required: true
   ado-token:
-    description: TODO
+    description: 'The Personal Access Token (PAT) associated with your Azure Devops account'
     required: true
-  gh-token:
-    description: TODO
+  github-token:
+    description: 'The authentication token for GitHub, supplied as secrets.GITHUB_TOKEN by default'
     required: true
-outputs: {}
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args: # TODO
-  - ${{ inputs.ado-project-url }}
-  - ${{ inputs.repository }}
-  - ${{ inputs.issue-number }}
-  - ${{ inputs.ado-token }}
-  - ${{ inputs.gh-token }}
-  - ${{ inputs.ado-collection-url }}
+  args:
+    - ${{ inputs.ado-project-url }}
+    - ${{ inputs.github-repo }}
+    - ${{ inputs.issue-number }}
+    - ${{ inputs.ado-token }}
+    - ${{ inputs.github-token }}
+    - ${{ inputs.ado-collection-url }}
