@@ -2,7 +2,6 @@
 using Octokit;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using System.CommandLine.Invocation;
-using System.Reflection;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 
@@ -215,14 +214,6 @@ class Program
         });
     }
 
-    /// <summary>
-    ///     Gets an existing ADO work item for the given GitHub issue if
-    ///     it already exists.
-    /// </summary>
-    /// <returns>
-    ///     An existing work item for the given GitHub issue if one exists,
-    ///     and <c>null</c> otherwise.
-    /// </returns>
     static async Task<WorkItem?> GetAdoWorkItem(Issue issue)
     {
         var escapedTitle = issue
@@ -293,55 +284,4 @@ class Program
             AnsiConsole.MarkupLine("Not creating new work item in ADO, as --dry-run was set.");
         }
     }
-
-    // The following comments came from attempts to use WIQL to search for
-    // artifact links.
-    // static async Task OtherStuff()
-    // {
-
-    //     var creds = new VssBasicCredential(string.Empty, adoPat);
-    //     var connection = new VssConnection(new Uri(collectionUri), creds);
-    //     await connection.ConnectAsync();
-    //     var workItemClient = connection.GetClient<WorkItemTrackingHttpClient>();
-    //     var existingItem = await workItemClient.GetWorkItemAsync(projectName, 30677, expand: WorkItemExpand.Relations);
-    //     var related = await workItemClient.QueryByWiqlAsync(
-    //         new Wiql
-    //         {
-    //             Query = $@"
-    //                 SELECT [System.Id]
-    //                 FROM WorkItemLinks
-    //                 WHERE ([Source].[System.Id] = '{existingItem.Id}')
-    //             "
-    //         },
-    //         projectName
-    //     );
-    //     Debug.Assert(related != null);
-    //     foreach (var rel in related.WorkItemRelations)
-    //     {
-    //         (await workItemClient.GetWorkItemAsync(projectName, rel.Target.Id)).WriteToConsole();
-    //     }
-    // }
-
-    // connection.GetClient<
-        
-    // var newItem = await client.CreateWorkItemAsync(
-    //     new JsonPatchDocument
-    //     {
-    //         new JsonPatchOperation
-    //         {
-    //             Operation = Operation.Add,
-    //             Path = "/fields/System.Title",
-    //             Value = "[TEST] please delete"
-    //         },
-    //         new JsonPatchOperation
-    //         {
-    //             Operation = Operation.Add,
-    //             Path = "/fields/System.AreaPath",
-    //             Value = @"Quantum Program\Quantum Systems\QDK"
-    //         }
-    //     },
-    //     projectName,
-    //     "Task"
-    // );
-    // System.Console.WriteLine($"Created new work item: {newItem.Url}");
 }

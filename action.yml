@@ -1,11 +1,11 @@
 name: 'gh-sync Action'
 description: 'Run gh-sync to synchronize GitHub issues with ADO tracking'
 inputs:
-  ado-project-url:
-    description: 'Fully qualified URL to the Azure DevOps organization including the project name (e.g. https://dev.azure.com/organization/project-name)'
+  ado-organization-url:
+    description: 'Fully qualified URL to the Azure DevOps organization (e.g. https://dev.azure.com/organization/)'
     required: true
-  ado-collection-url:
-    description: 'Fully qualified URL to the Azure Devops organization (e.g. https://dev.azure.com/organization/)'
+  ado-project:
+    description: 'The name of the ADO project'
     required: true
   github-repo:
     description: 'The full GitHub repository path (e.g. microsoft/QuantumKatas)'
@@ -17,14 +17,14 @@ inputs:
     description: 'The Personal Access Token (PAT) associated with your Azure Devops account'
     required: true
   github-token:
-    description: 'The authentication token for GitHub, supplied as secrets.GITHUB_TOKEN by default'
+    description: 'The authentication token for GitHub such as a PAT or secrets.GITHUB_TOKEN'
     required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.ado-collection-url }}
-    - ${{ inputs.ado-project-url }}
+    - ${{ inputs.ado-organization-url }}
+    - ${{ inputs.ado-project }}
     - ${{ inputs.github-repo }}
     - ${{ inputs.issue-number }}
     - ${{ inputs.ado-token }}
