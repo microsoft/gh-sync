@@ -11,12 +11,13 @@ namespace gh_sync
 
     internal static class Extensions
     {
+        internal const string AreaPathName = "area-path";
         internal static string KeyName = @"Software\gh-sync";
-        
-        /// <param name="envVarName">
-        ///     If not <c>null</c>, will use the given environment variable in
-        ///     preference to the given registry key.
-        /// </param>
+        internal static readonly string AreaPath = Extensions.RetreiveOrPrompt(
+            AreaPathName,
+            prompt: "Please provide a URI for your ADO project organization: ",
+            envVarName: "AREA_PATH"
+        );
         internal static string RetreiveOrPrompt(string key, string prompt, string? envVarName = null)
         {
             if (envVarName != null)
@@ -185,7 +186,7 @@ namespace gh_sync
             IEnumerable<(string Path, string Value)> Operations()
             {
                 yield return ("/fields/System.Title", $"{issue.WorkItemTitle()}");
-                yield return ("/fields/System.AreaPath", @"Quantum Program\Quantum Systems\QID\Experience");
+                yield return ("/fields/System.AreaPath", @AreaPath);
                 var htmlBody = issue.Body.MarkdownToHtml();
                 var description = $"<h3>Description from <a href=\"{issue.HtmlUrl}\">{issue.Repository.Owner.Login}/{issue.Repository.Name}#{issue.Number}</a> (reported by <a href=\"{issue.User.HtmlUrl}\">@{issue.User.Login}</a>):</h3>\n\n{htmlBody}";
                 yield return (

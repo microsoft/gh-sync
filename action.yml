@@ -7,6 +7,9 @@ inputs:
   ado-project:
     description: 'The name of the ADO project'
     required: true
+  ado-area-path:
+    description: 'The backlog area that new ADO items will be created in (e.g. <Your Project>\Quantum Systems\QID\Experience)'
+    required: true
   github-repo:
     description: 'The full GitHub repository path (e.g. microsoft/QuantumKatas)'
     required: true
@@ -25,6 +28,7 @@ runs:
   args:
     - ${{ inputs.ado-organization-url }}
     - ${{ inputs.ado-project }}
+    - ${{ inputs.ado-area-path }}
     - ${{ inputs.github-repo }}
     - ${{ inputs.issue-number }}
     - ${{ inputs.ado-token }}
