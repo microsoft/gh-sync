@@ -109,6 +109,9 @@ namespace gh_sync
                                     $"\n  - {attr.Key}: {attr.Value}"
                                 )
                             );
+                if (relation.Title is null) {
+                    relation.Title = "";
+                }
                 relations.AddRow(relation.Title, relation.Rel, relation.Url, attrs);
             }
             table.AddRow(new Markup("Relations"), relations);
