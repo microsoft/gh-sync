@@ -8,10 +8,10 @@ inputs:
     description: 'The name of the ADO project'
     required: true
   ado-area-path:
-    description: 'The backlog area that new ADO items will be created in (e.g. <Your Project>\Quantum Systems\QID\Experience)'
+    description: 'The backlog area that new ADO items will be created in (e.g. <Your Project>/<Area>)'
     required: true
   github-repo:
-    description: 'The full GitHub repository path (e.g. microsoft/QuantumKatas)'
+    description: 'The full GitHub repository path (e.g. <GitHub Organization>/<GitHub Project>)'
     required: true
   issue-number:
     description: 'The issue number supplied from the triggered GitHub workflow'
