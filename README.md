@@ -3,16 +3,16 @@
 If your team manages public GitHub issues for open source repositories as well as internal tracking with Azure Devops (ADO), gh-sync can mirror the two while keeping internal information secure. The gh-sync project includes a Dockerfile from which the project is containerized to be used by a GitHub Action workflow. By using gh-sync as a GitHub Action or command line tools, individual contributors (ICs) are able to increase productivity and visibility as any changes to GitHub issues are reflected with their ADO issue counterparts.
 
 ```shell
-// Create or update an ADO bug for <GitHub Organization>/<GitHub Project>#500.
+# Create or update an ADO bug for <GitHub Organization>/<GitHub Project>#500.
 gh-sync pull-gh <GitHub Organization>/<GitHub Project> 500
 
-// Create or update all ADO issues with the "tracking" label from <GitHub Organization>/<GitHub Project>.
+# Create or update all ADO issues with the "tracking" label from <GitHub Organization>/<GitHub Project>.
 gh-sync pull-gh <GitHub Organization>/<GitHub Project> 500
 
-// Find existing ADO work item or bug for <GitHub Organization>/<GitHub Project>#500
+# Find existing ADO work item or bug for <GitHub Organization>/<GitHub Project>#500
 gh-sync find-ado <GitHub Organization>/<GitHub Project> 500
 
-// Show a text representation of ADO issue #31795.
+# Show a text representation of ADO issue #31795.
 gh-sync get-ado 31795
 ```
 
