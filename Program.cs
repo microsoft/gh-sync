@@ -11,6 +11,7 @@ class Program
 {
 
     internal record PullIssueOptions(bool DryRun, bool AllowExisting);
+    internal const string TrackingLabel = "tracking";
     private static Command PullIssueCommand()
     {
 
@@ -184,7 +185,7 @@ class Program
             State = ItemStateFilter.All,
             Filter = IssueFilter.All,
         };
-        issueRequest.Labels.Add("ado-sync");
+        issueRequest.Labels.Add(TrackingLabel);
         
         var issues = await GitHub.WithClient(async client => await client.Issue.GetAllForRepository(
             repositoryId: repository.Id,
