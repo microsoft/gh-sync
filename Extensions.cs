@@ -4,7 +4,6 @@ using Patch = Microsoft.VisualStudio.Services.WebApi.Patch;
 using Octokit;
 using Microsoft.Win32;
 using Markdig.Renderers;
-using Spectre.Console;
 using System.Reflection;
 
 namespace gh_sync
@@ -164,18 +163,6 @@ namespace gh_sync
                         Ado.ProjectName, workItem.Id!.Value
                     );
                     // TODO: update Reason
-                    // return await client.UpdateWorkItemAsync(
-                    //     new Patch.Json.JsonPatchDocument
-                    //     {
-                    //         new Patch.Json.JsonPatchOperation
-                    //         {
-                    //             Operation = Patch.Operation.Replace,
-                    //             Path = "/fields/System.Reason",
-                    //             Value = state.Reason
-                    //         }
-                    //     },
-                    //     Ado.ProjectName, workItem.Id!.Value
-                    // );
                 }
                 else
                 {
