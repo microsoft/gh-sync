@@ -16,7 +16,7 @@ static class Ado
     internal static readonly string CollectionUri = Extensions.RetreiveOrPrompt(
         ADOUriName,
         prompt: "Please provide a URI for your ADO project organization: ",
-        envVarName: "ADO_URI"
+        envVarName: "ADO_URL"
     );
     internal static readonly string ProjectName = Extensions.RetreiveOrPrompt(
         ADOUriName,

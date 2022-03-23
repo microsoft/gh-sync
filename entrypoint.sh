@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export ADO_URI=$1
+export ADO_URL=$1
 export ADO_PROJECT=$2
 export AREA_PATH=$3
 export GH_REPO=$4
