@@ -15,8 +15,8 @@ namespace gh_sync
         internal static string KeyName = @"Software\gh-sync";
         internal static readonly string AreaPath = Extensions.RetreiveOrPrompt(
             AreaPathName,
-            prompt: "Please provide a URI for your ADO project organization: ",
-            envVarName: "AREA_PATH"
+            prompt: "Please provide an area path for your ADO project organization: ",
+            envVarName: "ADO_AREA_PATH"
         );
         internal static string RetreiveOrPrompt(string key, string prompt, string? envVarName = null)
         {
