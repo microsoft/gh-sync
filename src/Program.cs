@@ -263,6 +263,8 @@ class Program
                     await workItem.UpdateFromIssue(ghIssue);
                     AnsiConsole.MarkupLine("Updating issue state...");
                     await workItem.UpdateState(ghIssue);
+                    var nCommentsAdded = await workItem.UpdateCommentsFromIssue(issue).CountAsync();
+                    AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
                 }
                 else
                 {
