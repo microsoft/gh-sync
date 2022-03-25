@@ -7,7 +7,7 @@ If your team manages public GitHub issues for open source repositories as well a
 gh-sync pull-gh <GitHub Organization>/<GitHub Project> 500
 
 # Create or update all ADO issues with the "tracking" label from <GitHub Organization>/<GitHub Project>.
-gh-sync pull-gh <GitHub Organization>/<GitHub Project> 500
+gh-sync pull-all-gh <GitHub Organization>/<GitHub Project>
 
 # Find existing ADO work item or bug for <GitHub Organization>/<GitHub Project>#500
 gh-sync find-ado <GitHub Organization>/<GitHub Project> 500
