@@ -167,17 +167,6 @@ static class Ado
             )
         );
 
-        await Ado.WithWorkItemClient(async client =>
-            await client.AddCommentAsync(
-                new CommentCreate
-                {
-                    Text = $"Work item updated from GitHub public issue at {issue.Url}, using the gh-sync tool."
-                },
-                Ado.ProjectName,
-                workItem.Id.Value
-            )
-        );
-
         return result;
     }
 }
