@@ -26,6 +26,8 @@ gh-sync get-ado 31795
 
 A [GitHub Action](https://github.com/features/actions) is the recommended way to include gh-sync to your repositories. Simply create a new action under `<YourGitRepo>/.github/worfklows/<YourAction>.yml` to specify when gh-sync should be called. Your action can be specified to specific issue events or applied to only specific labels for automatic mirroring between GitHub and ADO issues.
 
+The below example will trigger a workflow whenever an issue is modified as well as when there are any issue comments. Events are then filtered by the 'tracking' label. The only variables that must be configured are the ado organization url, project, area-path and a personal access token (PAT) to access ADO.
+
 ```yml
 name: Sync GitHub with ADO
 
