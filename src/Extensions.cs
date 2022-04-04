@@ -185,7 +185,7 @@ namespace gh_sync
         {
             IEnumerable<(string Path, string Value)> Operations()
             {
-                yield return ("/fields/System.Title", $"{issue.WorkItemTitle()}");
+                yield return ($"{issue.WorkItemTitle()}", "/fields/System.Title");
                 yield return ("/fields/System.AreaPath", @AreaPath);
                 var htmlBody = issue.Body.MarkdownToHtml();
                 var description = $"<h3>Description from <a href=\"{issue.HtmlUrl}\">{issue.Repository.Owner.Login}/{issue.Repository.Name}#{issue.Number}</a> (reported by <a href=\"{issue.User.HtmlUrl}\">@{issue.User.Login}</a>):</h3>\n\n{htmlBody}";
