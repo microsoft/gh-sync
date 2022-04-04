@@ -120,15 +120,18 @@ static class Ado
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         Debug.Assert(issue.Repository != null);
-
+        
         var patch = issue.AsPatch();
 
         var newItem = await Ado.WithWorkItemClient(async client =>
-            await client.CreateWorkItemAsync(
-                patch,
-                Ado.ProjectName,
-                issue.WorkItemType()
-            )
+            {
+                var result = await client.CreateWorkItemAsync(
+                    patch,
+                    Ado.ProjectName,
+                    issue.WorkItemType()
+                );
+                return result;
+            }
         );
         // newItem.
 
