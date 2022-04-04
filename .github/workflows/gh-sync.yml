@@ -23,7 +23,7 @@ jobs:
           secrets: 'ghSyncBuildPAT'
 
       - name: 'Trigger gh-sync'
-        uses: microsoft/gh-sync@main
+        uses: microsoft/gh-sync@imiles/debug
         with:
           ado-organization-url: ${{ secrets.ADO_URL }}
           ado-project: ${{ secrets.ADO_PROJECT }}
