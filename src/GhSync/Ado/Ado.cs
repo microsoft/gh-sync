@@ -8,7 +8,7 @@ using Octokit;
 
 namespace gh_sync;
 
-static class Ado
+public static class Ado
 {
     internal const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
@@ -116,7 +116,7 @@ static class Ado
         }
     }
 
-    internal static async Task<WorkItem> PullWorkItemFromIssue(Issue issue)
+    public static async Task<WorkItem> PullWorkItemFromIssue(Issue issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         Debug.Assert(issue.Repository != null);

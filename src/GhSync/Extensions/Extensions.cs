@@ -9,7 +9,7 @@ using System.Reflection;
 namespace gh_sync
 {
 
-    internal static class Extensions
+    public static class Extensions
     {
         internal const string AreaPathName = "area-path";
         internal static string KeyName = @"Software\gh-sync";
