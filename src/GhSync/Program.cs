@@ -260,7 +260,7 @@ class Program
                 AnsiConsole.MarkupLine("Updating existing issue, since --allow-existing was not set.");
                 if (!dryRun)
                 {
-                    await workItem.UpdateFromIssue(ghIssue);
+                    await Ado.UpdateFromIssue(workItem, ghIssue);
                     AnsiConsole.MarkupLine("Updating issue state...");
                     await workItem.UpdateState(ghIssue);
                     var nCommentsAdded = await workItem.UpdateCommentsFromIssue(ghIssue).CountAsync();

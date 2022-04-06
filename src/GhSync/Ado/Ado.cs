@@ -161,7 +161,7 @@ public static class Ado
         return newItem;
     }
 
-    internal static async Task<WorkItem> UpdateFromIssue(this WorkItem workItem, Issue issue)
+    public static async Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
