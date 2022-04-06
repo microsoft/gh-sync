@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
@@ -64,7 +63,10 @@ public static class Ado
 
     internal static async IAsyncEnumerable<Comment> EnumerateComments(this WorkItem workItem)
     {
-        Debug.Assert(workItem.Id != null);
+        if (workItem.Id == null)
+        {
+            throw new Exception($"New work item {workItem.Url} did not have an ID; could not add comment text.");
+        }
 
         string? continuationToken = null;
         do
@@ -85,10 +87,13 @@ public static class Ado
         while (continuationToken != null);
     }
 
-    internal static async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(this WorkItem workItem, Issue issue)
+    public static async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(this WorkItem workItem, Issue issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
-        Debug.Assert(workItem.Id != null);
+        if (workItem.Id == null)
+        {
+            throw new Exception($"New work item {workItem.Url} did not have an ID; could not add comment text.");
+        }
 
         var ghComments = await GitHub.WithClient(async client =>
             await client.Issue.Comment.GetAllForIssue(issue.Repository.Id, issue.Number)
@@ -159,8 +164,11 @@ public static class Ado
     internal static async Task<WorkItem> UpdateFromIssue(this WorkItem workItem, Issue issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
-        Debug.Assert(issue.Repository != null);
-        Debug.Assert(workItem.Id != null);
+        if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
+        if (workItem.Id == null)
+        {
+            throw new Exception($"New work item {workItem.Url} did not have an ID; could not add comment text.");
+        }
 
         var patch = issue.AsPatch(operation: Operation.Replace);
 
