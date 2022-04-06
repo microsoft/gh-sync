@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GhSync\GhSync.csproj" />
+    <ProjectReference Include="..\..\src\GhSync\GhSync.csproj" />
   </ItemGroup>
 
 </Project>

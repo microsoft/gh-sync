@@ -116,7 +116,7 @@ public static class Ado
         }
     }
 
-    public static async Task<WorkItem> PullWorkItemFromIssue(Issue issue)
+    public static async Task<WorkItem> PullWorkItemFromIssue(Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         Debug.Assert(issue.Repository != null);
