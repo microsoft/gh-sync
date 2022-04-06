@@ -119,7 +119,7 @@ public static class Ado
     public static async Task<WorkItem> PullWorkItemFromIssue(Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
-        Debug.Assert(issue.Repository != null);
+        if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
         
         var patch = issue.AsPatch();
 
