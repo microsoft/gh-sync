@@ -4,7 +4,6 @@ using Octokit;
 using System;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using Moq;
 
 
 public class AdoTests
@@ -39,18 +38,13 @@ public class AdoTests
     [Fact]
     public async Task GivenIssueNoRepositoryThrowException()
     {
-        Mock<Issue> issue = new Mock<Issue>();
-        issue.Setup(x => x.Repository).Returns(new Repository());
+        var issue = new Issue();
 
         WorkItem testWorkItem = new WorkItem();
         testWorkItem.Id = 0;
 
-        Assert.NotNull(issue);
-        Assert.NotNull(issue.Object.Repository);
-        Assert.NotNull(testWorkItem.Id);
-
         await Assert.ThrowsAsync<Exception>(
-            async () => await Ado.UpdateFromIssue(testWorkItem, issue.Object)
+            async () => await Ado.UpdateFromIssue(testWorkItem, issue)
         );
     }
 }

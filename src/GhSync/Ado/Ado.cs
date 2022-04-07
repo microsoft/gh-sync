@@ -167,7 +167,7 @@ public static class Ado
         if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
         if (workItem.Id == null)
         {
-            throw new Exception($"New work item {workItem.Url} did not have an ID; could not add comment text.");
+            throw new NullReferenceException($"New work item {workItem.Url} did not have an ID; could not add comment text.");
         }
 
         var patch = issue.AsPatch(operation: Operation.Replace);
