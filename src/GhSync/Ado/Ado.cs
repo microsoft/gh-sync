@@ -211,7 +211,7 @@ public static class Ado
         {
             AnsiConsole.MarkupLine($"Exception querying existing ADO items for \"{escapedTitle}\".");
             AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-            return null;
+            throw ex;
         }
     }
 }
