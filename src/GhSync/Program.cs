@@ -1,5 +1,4 @@
 ﻿using System.CommandLine;
-using Octokit;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using System.CommandLine.Invocation;
 using System.CommandLine.Builder;
@@ -11,7 +10,6 @@ class Program
 {
 
     internal record PullIssueOptions(bool DryRun, bool AllowExisting);
-    internal const string TrackingLabel = "tracking";
     private static Command PullIssueCommand()
     {
 
@@ -41,8 +39,8 @@ class Program
         command.Handler = CommandHandler.Create<string, int, PullIssueOptions>(async (repo, issue, options) =>
         {
             AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
-            var ghIssue = await GetGitHubIssue(repo, issue);
-            await PullGitHubIssue(ghIssue, options.DryRun, options.AllowExisting);
+            var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
+            await GitHub.PullGitHubIssue(ghIssue, options.DryRun, options.AllowExisting);
         });
 
         return command;
@@ -76,11 +74,11 @@ class Program
             await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
                 $"Getting all GitHub issues from {repo}...", async ctx =>
                 {
-                    var ghIssues = (await GetGitHubIssuesFromRepo(repo)).ToList();
+                    var ghIssues = (await GitHub.GetGitHubIssuesFromRepo(repo)).ToList();
                     foreach (var issue in ghIssues)
                     {
                         ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
-                        await PullGitHubIssue(issue, options.DryRun, options.AllowExisting);
+                        await GitHub.PullGitHubIssue(issue, options.DryRun, options.AllowExisting);
                     }
                     AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
                 });
@@ -132,8 +130,8 @@ class Program
         command.Handler = CommandHandler.Create<string, int>(async (repo, issue) =>
         {
             AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
-            var ghIssue = await GetGitHubIssue(repo, issue);
-            var workItem = await GetAdoWorkItem(ghIssue);
+            var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
+            var workItem = await Ado.GetAdoWorkItem(ghIssue);
             if (workItem != null)
             {
                 AnsiConsole.MarkupLine($"Found existing work item: {workItem.ReadableLink()}");
@@ -174,117 +172,5 @@ class Program
             .UseDefaults()
             .Build()
             .InvokeAsync(args);
-    }
-
-    static async Task<IEnumerable<Issue>> GetGitHubIssuesFromRepo(string repo)
-    {
-        var parts = repo.Split("/", 2);
-        var repository = await GitHub.WithClient(async client => await client.Repository.Get(parts[0], parts[1]));
-        var issueRequest = new RepositoryIssueRequest
-        {
-            State = ItemStateFilter.All,
-            Filter = IssueFilter.All,
-        };
-        issueRequest.Labels.Add(TrackingLabel);
-        
-        var issues = await GitHub.WithClient(async client => await client.Issue.GetAllForRepository(
-            repositoryId: repository.Id,
-            request: issueRequest
-        ));
-        return issues
-            .Where(issue => issue.PullRequest == null)
-            .Select(issue =>
-            {
-                var withRepo = issue.AddRepoMetadata(repository);
-                return withRepo;
-            });
-    }
-
-    static async Task<Issue> GetGitHubIssue(string repo, int id)
-    {
-        var parts = repo.Split("/", 2);
-        return await GitHub.WithClient(async client =>
-        {
-            AnsiConsole.MarkupLine("[white]Got GitHub client.[/]");
-            var repository = await client.Repository.Get(parts[0], parts[1]);
-            AnsiConsole.MarkupLine($"[white]Got repository: {repository.HtmlUrl}.[/]");
-            var issue = await client.Issue.Get(repositoryId: repository.Id, id);
-            AnsiConsole.MarkupLine($"[white]Got issue: {issue.HtmlUrl}.[/]");
-            issue.AddRepoMetadata(repository);
-            return issue;
-        });
-    }
-
-    static async Task<WorkItem?> GetAdoWorkItem(Issue issue)
-    {
-        var escapedTitle = issue
-            .WorkItemTitle()
-            .Replace("\\", @"\\")
-            .Replace("\"", @"\""");
-        try
-        {
-            var workItems = await Ado.WithWorkItemClient(async (client) =>
-            {
-                return await client.QueryByWiqlAsync(
-                    new Wiql
-                    {
-                        Query = $@"
-                            SELECT [System.Id]
-                            FROM WorkItems
-                            WHERE ([Title] = ""{escapedTitle}"")
-                        "
-                    }
-                );
-            });
-            return workItems.WorkItems.SingleOrDefault() is {} workItemRef
-                    ? await Ado.WithWorkItemClient(client => client.GetWorkItemAsync(workItemRef.Id))
-                    : null;
-        }
-        catch (Exception ex)
-        {
-            AnsiConsole.MarkupLine($"Exception querying existing ADO items for \"{escapedTitle}\".");
-            AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-            return null;
-        }
-    }
-
-    private static async Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false)
-    {
-        // Check if there's already a work item.
-        var workItem = await GetAdoWorkItem(ghIssue);
-        if (workItem != null)
-        {
-            AnsiConsole.MarkupLine($"Found existing work item: {workItem.ReadableLink()}");
-            if (!allowExisting)
-            {
-                AnsiConsole.MarkupLine("Updating existing issue, since --allow-existing was not set.");
-                if (!dryRun)
-                {
-                    await Ado.UpdateFromIssue(workItem, ghIssue);
-                    AnsiConsole.MarkupLine("Updating issue state...");
-                    await workItem.UpdateState(ghIssue);
-                    var nCommentsAdded = await workItem.UpdateCommentsFromIssue(ghIssue).CountAsync();
-                    AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("Not updating new work item in ADO, as --dry-run was set.");
-                }
-                return;
-            }
-            AnsiConsole.MarkupLine("Creating new work item, since --allow-existing was set.");
-        }
-        // TODO: possibly update milestones, item type, etc.
-
-        if (!dryRun)
-        {
-            var newWorkItem = await Ado.PullWorkItemFromIssue(ghIssue);
-            await newWorkItem.UpdateState(ghIssue);
-            AnsiConsole.MarkupLine($@"Created new work item: {newWorkItem.ReadableLink()}");
-        }
-        else
-        {
-            AnsiConsole.MarkupLine("Not creating new work item in ADO, as --dry-run was set.");
-        }
     }
 }

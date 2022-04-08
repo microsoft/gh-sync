@@ -180,4 +180,37 @@ public static class Ado
 
         return result;
     }
+
+    public static async Task<WorkItem?> GetAdoWorkItem(Issue issue)
+    {
+        var escapedTitle = issue
+            .WorkItemTitle()
+            .Replace("\\", @"\\")
+            .Replace("\"", @"\""");
+        try
+        {
+            var workItems = await Ado.WithWorkItemClient(async (client) =>
+            {
+                return await client.QueryByWiqlAsync(
+                    new Wiql
+                    {
+                        Query = $@"
+                            SELECT [System.Id]
+                            FROM WorkItems
+                            WHERE ([Title] = ""{escapedTitle}"")
+                        "
+                    }
+                );
+            });
+            return workItems.WorkItems.SingleOrDefault() is {} workItemRef
+                    ? await Ado.WithWorkItemClient(client => client.GetWorkItemAsync(workItemRef.Id))
+                    : null;
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"Exception querying existing ADO items for \"{escapedTitle}\".");
+            AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+            return null;
+        }
+    }
 }
