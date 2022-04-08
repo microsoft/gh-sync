@@ -21,6 +21,10 @@ public class AdoTests
         await Assert.ThrowsAsync<ArgumentNullException>(
             async () => await Ado.UpdateFromIssue(testWorkItem, nullIssue)
         );
+
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            async () => await Ado.GetAdoWorkItem(nullIssue)
+        );
     }
 
     [Fact]
@@ -48,3 +52,4 @@ public class AdoTests
         );
     }
 }
+

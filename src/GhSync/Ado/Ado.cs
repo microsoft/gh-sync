@@ -181,8 +181,9 @@ public static class Ado
         return result;
     }
 
-    public static async Task<WorkItem?> GetAdoWorkItem(Issue issue)
+    public static async Task<WorkItem?> GetAdoWorkItem(Issue? issue)
     {
+        if (issue == null) throw new ArgumentNullException(nameof(issue));
         var escapedTitle = issue
             .WorkItemTitle()
             .Replace("\\", @"\\")
