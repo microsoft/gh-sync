@@ -71,9 +71,9 @@ public static class Ado
         string? continuationToken = null;
         do
         {
-            var batch = await Ado.WithWorkItemClient(async client =>
+            var batch = await WithWorkItemClient(async client =>
                 await client.GetCommentsAsync(
-                    Ado.ProjectName,
+                    ProjectName,
                     workItem.Id.Value,
                     continuationToken: continuationToken
                 )
@@ -87,7 +87,7 @@ public static class Ado
         while (continuationToken != null);
     }
 
-    public static async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(this WorkItem workItem, Issue issue)
+    public static async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (workItem.Id == null)
@@ -107,13 +107,13 @@ public static class Ado
             {
                 // Need to post a new comment.
                 var commentText = $"<a href=\"{ghComment.HtmlUrl}\">GitHub comment by @{ghComment.User.Login}:</a>\n\n{ghComment.Body.MarkdownToHtml()}\n\n<br><hr><span style=\"font-size: 8px\">{sigilString}</span>";
-                yield return await Ado.WithWorkItemClient(async client =>
+                yield return await WithWorkItemClient(async client =>
                     await client.AddCommentAsync(
                         new CommentCreate
                         {
                             Text = commentText
                         },
-                        Ado.ProjectName,
+                        ProjectName,
                         workItem.Id.Value
                     )
                 );
@@ -128,11 +128,11 @@ public static class Ado
         
         var patch = issue.AsPatch();
 
-        var newItem = await Ado.WithWorkItemClient(async client =>
+        var newItem = await WithWorkItemClient(async client =>
             {
                 var result = await client.CreateWorkItemAsync(
                     patch,
-                    Ado.ProjectName,
+                    ProjectName,
                     issue.WorkItemType()
                 );
                 return result;
@@ -145,18 +145,18 @@ public static class Ado
             throw new Exception($"New work item {newItem.Url} did not have an ID; could not add comment text.");
         }
 
-        await Ado.WithWorkItemClient(async (client) =>
+        await WithWorkItemClient(async (client) =>
             await client.AddCommentAsync(
                 new CommentCreate
                 {
                     Text = $"Work item created from public GitHub issue at {issue.Url}, using the gh-sync tool."
                 },
-                Ado.ProjectName,
+                ProjectName,
                 newItem.Id.Value
             )
         );
 
-        var nCommentsAdded = await newItem.UpdateCommentsFromIssue(issue).CountAsync();
+        var nCommentsAdded = await UpdateCommentsFromIssue(newItem, issue).CountAsync();
         AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
         return newItem;
     }
@@ -172,7 +172,7 @@ public static class Ado
 
         var patch = issue.AsPatch(operation: Operation.Replace);
 
-        var result = await Ado.WithWorkItemClient(async client =>
+        var result = await WithWorkItemClient(async client =>
             await client.UpdateWorkItemAsync(
                 patch, workItem.Id.Value
             )
@@ -190,7 +190,7 @@ public static class Ado
             .Replace("\"", @"\""");
         try
         {
-            var workItems = await Ado.WithWorkItemClient(async (client) =>
+            var workItems = await WithWorkItemClient(async (client) =>
             {
                 return await client.QueryByWiqlAsync(
                     new Wiql

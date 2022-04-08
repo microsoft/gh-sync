@@ -59,7 +59,7 @@ public static class GitHub
     public static async Task<IEnumerable<Issue>> GetGitHubIssuesFromRepo(string repo)
     {
         var parts = repo.Split("/", 2);
-        var repository = await GitHub.WithClient(async client => await client.Repository.Get(parts[0], parts[1]));
+        var repository = await WithClient(async client => await client.Repository.Get(parts[0], parts[1]));
         var issueRequest = new RepositoryIssueRequest
         {
             State = ItemStateFilter.All,
@@ -67,7 +67,7 @@ public static class GitHub
         };
         issueRequest.Labels.Add(TrackingLabel);
         
-        var issues = await GitHub.WithClient(async client => await client.Issue.GetAllForRepository(
+        var issues = await WithClient(async client => await client.Issue.GetAllForRepository(
             repositoryId: repository.Id,
             request: issueRequest
         ));
@@ -83,7 +83,7 @@ public static class GitHub
     public static async Task<Issue> GetGitHubIssue(string repo, int id)
     {
         var parts = repo.Split("/", 2);
-        return await GitHub.WithClient(async client =>
+        return await WithClient(async client =>
         {
             AnsiConsole.MarkupLine("[white]Got GitHub client.[/]");
             var repository = await client.Repository.Get(parts[0], parts[1]);
@@ -110,7 +110,7 @@ public static class GitHub
                     await Ado.UpdateFromIssue(workItem, ghIssue);
                     AnsiConsole.MarkupLine("Updating issue state...");
                     await workItem.UpdateState(ghIssue);
-                    var nCommentsAdded = await workItem.UpdateCommentsFromIssue(ghIssue).CountAsync();
+                    var nCommentsAdded = await Ado.UpdateCommentsFromIssue(workItem, ghIssue).CountAsync();
                     AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
                 }
                 else
