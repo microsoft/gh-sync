@@ -132,7 +132,7 @@ namespace gh_sync
                 labels.Any(label => issueLabel.Name == label)
             );
 
-        internal static string WorkItemType(this Issue issue)
+        public static string WorkItemType(this Issue issue)
         {
             if (issue.IsLabeledAs("bug", "Kind-Bug"))
             {
