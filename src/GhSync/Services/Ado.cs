@@ -7,7 +7,7 @@ using Octokit;
 
 namespace gh_sync;
 
-public static class Ado
+public class Ado : IAdo
 {
     internal const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
@@ -24,8 +24,7 @@ public static class Ado
     );
 
     private static VssConnection? adoConnection = null;
-    private static async Task<VssConnection> GetAdoConnection()
-    
+    public async Task<VssConnection> GetAdoConnection()
     {
         if (adoConnection != null)
         {
@@ -58,10 +57,11 @@ public static class Ado
         throw new AuthorizationException();
     }
 
-    internal static Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation) =>
+    public Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation) =>
         GetAdoConnection().Bind(connection => connection.GetClient<WorkItemTrackingHttpClient>()).Bind(continuation);
 
-    internal static async IAsyncEnumerable<Comment> EnumerateComments(this WorkItem workItem)
+
+    public async IAsyncEnumerable<Comment> EnumerateComments(WorkItem workItem)
     {
         if (workItem.Id == null)
         {
@@ -87,7 +87,8 @@ public static class Ado
         while (continuationToken != null);
     }
 
-    public static async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue issue)
+
+    public async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (workItem.Id == null)
@@ -98,7 +99,7 @@ public static class Ado
         var ghComments = await GitHub.WithClient(async client =>
             await client.Issue.Comment.GetAllForIssue(issue.Repository.Id, issue.Number)
         );
-        var adoComments = await workItem.EnumerateComments().ToListAsync();
+        var adoComments = await EnumerateComments(workItem).ToListAsync();
 
         foreach (var ghComment in ghComments)
         {
@@ -121,7 +122,7 @@ public static class Ado
         }
     }
 
-    public static async Task<WorkItem> PullWorkItemFromIssue(Issue? issue)
+    public async Task<WorkItem> PullWorkItemFromIssue(Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
@@ -138,7 +139,6 @@ public static class Ado
                 return result;
             }
         );
-        // newItem.
 
         if (newItem.Id == null)
         {
@@ -161,7 +161,7 @@ public static class Ado
         return newItem;
     }
 
-    public static async Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue)
+    public async Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
@@ -181,7 +181,7 @@ public static class Ado
         return result;
     }
 
-    public static async Task<WorkItem?> GetAdoWorkItem(Issue? issue)
+    public async Task<WorkItem?> GetAdoWorkItem(Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         var escapedTitle = issue
@@ -204,7 +204,7 @@ public static class Ado
                 );
             });
             return workItems.WorkItems.SingleOrDefault() is {} workItemRef
-                    ? await Ado.WithWorkItemClient(client => client.GetWorkItemAsync(workItemRef.Id))
+                    ? await WithWorkItemClient(client => client.GetWorkItemAsync(workItemRef.Id))
                     : null;
         }
         catch (Exception ex)
@@ -214,4 +214,5 @@ public static class Ado
             throw ex;
         }
     }
+
 }

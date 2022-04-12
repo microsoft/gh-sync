@@ -2,7 +2,7 @@ using Octokit;
 
 namespace gh_sync;
 
-public static class GitHub
+public class GitHub : IGitHub
 {
     private const string GHTokenName = "gh-token";
     private const string ProductName = "ms-quantum-gh-sync";
@@ -95,43 +95,4 @@ public static class GitHub
         });
     }
 
-    public static async Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false)
-    {
-        // Check if there's already a work item.
-        var workItem = await Ado.GetAdoWorkItem(ghIssue);
-        if (workItem != null)
-        {
-            AnsiConsole.MarkupLine($"Found existing work item: {workItem.ReadableLink()}");
-            if (!allowExisting)
-            {
-                AnsiConsole.MarkupLine("Updating existing issue, since --allow-existing was not set.");
-                if (!dryRun)
-                {
-                    await Ado.UpdateFromIssue(workItem, ghIssue);
-                    AnsiConsole.MarkupLine("Updating issue state...");
-                    await workItem.UpdateState(ghIssue);
-                    var nCommentsAdded = await Ado.UpdateCommentsFromIssue(workItem, ghIssue).CountAsync();
-                    AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine("Not updating new work item in ADO, as --dry-run was set.");
-                }
-                return;
-            }
-            AnsiConsole.MarkupLine("Creating new work item, since --allow-existing was set.");
-        }
-        // TODO: possibly update milestones, item type, etc.
-
-        if (!dryRun)
-        {
-            var newWorkItem = await Ado.PullWorkItemFromIssue(ghIssue);
-            await newWorkItem.UpdateState(ghIssue);
-            AnsiConsole.MarkupLine($@"Created new work item: {newWorkItem.ReadableLink()}");
-        }
-        else
-        {
-            AnsiConsole.MarkupLine("Not creating new work item in ADO, as --dry-run was set.");
-        }
-    }
 }

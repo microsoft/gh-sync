@@ -8,9 +8,28 @@ namespace gh_sync;
 
 class Program
 {
+    protected readonly IServiceProvider services;
+
+    public Program(Action<IServiceCollection>? configureServices = null)
+    {
+        var services = new ServiceCollection();
+        if (configureServices == null)
+        {
+            new Startup().ConfigureServices(services);
+        }
+        else
+        {
+            configureServices(services);
+        }
+        this.services = services.BuildServiceProvider();
+    }
+
+    static async Task<int> Main(string[] args) =>
+        await new Program().Invoke(args);
+
 
     internal record PullIssueOptions(bool DryRun, bool AllowExisting);
-    private static Command PullIssueCommand()
+    private Command PullIssueCommand()
     {
 
         var command = new Command("pull-gh")
@@ -36,11 +55,12 @@ class Program
             )
         };
 
-        command.Handler = CommandHandler.Create<string, int, PullIssueOptions>(async (repo, issue, options) =>
+        command.SetHandler<string, int, PullIssueOptions>(async (repo, issue, options) =>
         {
+            var sync = services.GetRequiredService<ISynchronizer>();
             AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
             var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
-            await GitHub.PullGitHubIssue(ghIssue, options.DryRun, options.AllowExisting);
+            await sync.PullGitHubIssue(ghIssue, options.DryRun, options.AllowExisting);
         });
 
         return command;
@@ -48,7 +68,7 @@ class Program
     }
 
     internal record PullAllIssueOptions(bool DryRun, bool AllowExisting);
-    private static Command PullAllIssuesCommand()
+    private Command PullAllIssuesCommand()
     {
 
         var command = new Command("pull-all-gh")
@@ -69,8 +89,9 @@ class Program
             )
         };
 
-        command.Handler = CommandHandler.Create<string, PullAllIssueOptions>(async (repo, options) =>
+        command.SetHandler<string, PullAllIssueOptions>(async (repo, options) =>
         {
+            var sync = services.GetRequiredService<ISynchronizer>();
             await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
                 $"Getting all GitHub issues from {repo}...", async ctx =>
                 {
@@ -78,7 +99,7 @@ class Program
                     foreach (var issue in ghIssues)
                     {
                         ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
-                        await GitHub.PullGitHubIssue(issue, options.DryRun, options.AllowExisting);
+                        await sync.PullGitHubIssue(issue, options.DryRun, options.AllowExisting);
                     }
                     AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
                 });
@@ -87,9 +108,8 @@ class Program
         return command;
 
     }
-    
 
-    private static Command GetAdoWorkItemCommand()
+    private Command GetAdoWorkItemCommand()
     {
 
         var command = new Command("get-ado")
@@ -97,9 +117,10 @@ class Program
             new Argument<int>("id")
         };
 
-        command.Handler = CommandHandler.Create<int>(async (id) =>
+        command.SetHandler<int>(async (id) =>
         {
-            var workItem = await Ado.WithWorkItemClient(async client =>
+            var ado = services.GetRequiredService<IAdo>();
+            var workItem = await ado.WithWorkItemClient(async client =>
                 await client.GetWorkItemAsync(Ado.ProjectName, id, expand: WorkItemExpand.Relations)
             );
             workItem.WriteToConsole();
@@ -109,7 +130,7 @@ class Program
 
     }
 
-    private static Command FindAdoWorkItemCommand()
+    private Command FindAdoWorkItemCommand()
     {
 
         var command = new Command("find-ado")
@@ -127,11 +148,12 @@ class Program
 
         };
 
-        command.Handler = CommandHandler.Create<string, int>(async (repo, issue) =>
+        command.SetHandler<string, int>(async (repo, issue) =>
         {
+            var ado = services.GetRequiredService<IAdo>();
             AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
             var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
-            var workItem = await Ado.GetAdoWorkItem(ghIssue);
+            var workItem = await ado.GetAdoWorkItem(ghIssue);
             if (workItem != null)
             {
                 AnsiConsole.MarkupLine($"Found existing work item: {workItem.ReadableLink()}");
@@ -146,7 +168,7 @@ class Program
 
     }
 
-    static async Task<int> Main(string[] args)
+    async Task<int> Invoke(string[] args)
     {
         var rootCommand = new RootCommand
         {
@@ -155,13 +177,13 @@ class Program
             GetAdoWorkItemCommand(),
             FindAdoWorkItemCommand()
         };
-        var attachOption = new Option("--attach", "Attaches a debugger before running.");
+        var attachOption = new Option<bool>("--attach", "Attaches a debugger before running.");
         rootCommand.AddOption(attachOption);
 
         return await new CommandLineBuilder(rootCommand)
-            .UseMiddleware(async (context, next) =>
+            .AddMiddleware(async (context, next) =>
             {
-                var attach = context.ParseResult.HasOption(attachOption) && context.ParseResult.ValueForOption<bool>(attachOption);
+                var attach = context.ParseResult.HasOption(attachOption) && context.ParseResult.GetValueForOption<bool>(attachOption);
                 if (attach)
                 {
                     System.Diagnostics.Debugger.Launch();

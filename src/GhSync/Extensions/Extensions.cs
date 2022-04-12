@@ -146,32 +146,6 @@ namespace gh_sync
             return "Bug";
         }
 
-        internal static async Task<WorkItem> UpdateState(this WorkItem workItem, Issue issue) =>
-            await Ado.WithWorkItemClient(async client =>
-            {
-                if (issue.WorkItemState() is {} state)
-                {
-                    return await client.UpdateWorkItemAsync(
-                        new Patch.Json.JsonPatchDocument
-                        {
-                            new Patch.Json.JsonPatchOperation
-                            {
-                                Operation = Patch.Operation.Replace,
-                                Path = "/fields/System.State",
-                                Value = state.State
-                            }
-                        },
-                        Ado.ProjectName, workItem.Id!.Value
-                    );
-                    // TODO: update Reason
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[bold yellow]Status of work item {workItem.ReadableLink()} not updated, as GitHub issue {issue.HtmlUrl} may be missing a triage label.[/]");
-                    return workItem;
-                }
-            });
-
         internal static string MarkdownToHtml(this string source)
         {
             var writer = new StringWriter();

@@ -1,13 +1,17 @@
+namespace gh_sync.Tests;
+
 using Xunit;
 using gh_sync;
 using Octokit;
 using System;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.Extensions.DependencyInjection;
 
-
-public class AdoTests
+public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
+    private IAdo Ado => Startup.Services.GetRequiredService<IAdo>();
+
     [Fact]
     public async Task GivenNullIssueThrowException()
     {
