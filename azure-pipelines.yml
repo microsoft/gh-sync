@@ -1,0 +1,25 @@
+trigger: none
+
+pr:
+- main
+
+pool:
+  vmImage: windows-latest
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET Core SDK'
+  inputs:
+    version: 6.0.x
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '**/GhSync*.csproj'
+  displayName: 'Build projects'
+ 
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: '**/*Tests.csproj'
+  displayName: 'Run Tests'

@@ -8,4 +8,4 @@ export ISSUE_NUM=$5
 export ADO_TOKEN=$6
 export GITHUB_TOKEN=$7
 
-dotnet /gh-sync.dll pull-gh $GH_REPO $ISSUE_NUM
+dotnet /GhSync.dll pull-gh $GH_REPO $ISSUE_NUM
