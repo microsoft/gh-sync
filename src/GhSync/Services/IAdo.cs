@@ -13,7 +13,7 @@ public interface IAdo
 
     Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation);
 
-    IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue issue);
+    IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue? issue);
 
     IAsyncEnumerable<Comment> EnumerateComments(WorkItem workItem);
 
@@ -22,5 +22,4 @@ public interface IAdo
     Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue);
 
     Task<WorkItem?> GetAdoWorkItem(Issue? issue);
-
 }

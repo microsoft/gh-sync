@@ -65,7 +65,7 @@ public class Ado : IAdo
     {
         if (workItem.Id == null)
         {
-            throw new Exception($"New work item {workItem.Url} did not have an ID; could not add comment text.");
+            throw new NullReferenceException($"New work item {workItem.Url} did not have an ID; could not add comment text.");
         }
 
         string? continuationToken = null;
@@ -88,12 +88,12 @@ public class Ado : IAdo
     }
 
 
-    public async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue issue)
+    public async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (workItem.Id == null)
         {
-            throw new Exception($"New work item {workItem.Url} did not have an ID; could not add comment text.");
+            throw new NullReferenceException($"New work item {workItem.Url} did not have an ID; could not add comment text.");
         }
 
         var ghComments = await GitHub.WithClient(async client =>
@@ -125,7 +125,7 @@ public class Ado : IAdo
     public async Task<WorkItem> PullWorkItemFromIssue(Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
-        if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
+        if (issue.Repository == null) throw new NullReferenceException($"Issue {issue.Title} did not have an associated repository.");
         
         var patch = issue.AsPatch();
 
@@ -164,7 +164,7 @@ public class Ado : IAdo
     public async Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
-        if (issue.Repository == null) throw new Exception($"Issue {issue.Title} did not have an associated repository.");
+        if (issue.Repository == null) throw new NullReferenceException($"Issue {issue.Title} did not have an associated repository.");
         if (workItem.Id == null)
         {
             throw new NullReferenceException($"New work item {workItem.Url} did not have an ID; could not add comment text.");
@@ -214,5 +214,4 @@ public class Ado : IAdo
             throw ex;
         }
     }
-
 }

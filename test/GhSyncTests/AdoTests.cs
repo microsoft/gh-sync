@@ -2,21 +2,48 @@ namespace gh_sync.Tests;
 
 using Xunit;
 using gh_sync;
-using Octokit;
 using System;
+using Octokit;
 using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
-    private IAdo Ado => Startup.Services.GetRequiredService<IAdo>();
+    // private IAdo Ado => Startup.Services.GetRequiredService<IAdo>();
+    Ado Ado = new Ado();
 
     [Fact]
-    public async Task GivenNullIssueThrowException()
+    public async Task test()
+    {
+        Issue testIssue = new Issue();
+        WorkItem testWorkItem = new WorkItem();
+        testWorkItem.Id = null;
+
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Ado.EnumerateComments(testWorkItem).ToListAsync()
+        );
+
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Ado.UpdateCommentsFromIssue(testWorkItem, testIssue).ToListAsync()
+        );
+
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Ado.UpdateFromIssue(testWorkItem, testIssue)
+        );
+    }
+
+    [Fact]
+    public async Task Given_null_issue_throw_exception()
     {
         Issue? nullIssue = null;
         WorkItem testWorkItem = new WorkItem();
+        testWorkItem.Id = 0;
+
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            async () => await Ado.UpdateCommentsFromIssue(testWorkItem, nullIssue).ToListAsync()
+        );
 
         await Assert.ThrowsAsync<ArgumentNullException>(
             async () => await Ado.PullWorkItemFromIssue(nullIssue)
@@ -32,27 +59,18 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     }
 
     [Fact]
-    public async Task GivenNullWorkItemIdThrowException()
+    public async Task Given_null_repository_throw_exception()
     {
-        Issue? issue = new Issue();
-        WorkItem testWorkItem = new WorkItem();
-        testWorkItem.Id = null;
-
-        await Assert.ThrowsAsync<Exception>(
-            async () => await Ado.UpdateFromIssue(testWorkItem, issue)
-        );
-    }
-
-    [Fact]
-    public async Task GivenIssueNoRepositoryThrowException()
-    {
-        var issue = new Issue();
-
+        Issue testIssue = new Issue();
         WorkItem testWorkItem = new WorkItem();
         testWorkItem.Id = 0;
 
-        await Assert.ThrowsAsync<Exception>(
-            async () => await Ado.UpdateFromIssue(testWorkItem, issue)
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Ado.PullWorkItemFromIssue(testIssue)
+        );
+
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Ado.UpdateFromIssue(testWorkItem, testIssue)
         );
     }
 }
