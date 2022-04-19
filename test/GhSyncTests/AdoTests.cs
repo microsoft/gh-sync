@@ -73,13 +73,5 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
             async () => await Ado.UpdateFromIssue(testWorkItem, testIssue)
         );
     }
-
-    [Fact]
-    public async Task test()
-    {
-        await Assert.ThrowsAsync<AuthorizationException>(
-            async () => await Ado.GetAdoConnection()
-        );
-    }
 }
 
