@@ -23,11 +23,6 @@ public class Ado : IAdo
         prompt: "Please provide a name for your ADO project: ",
         envVarName: "ADO_PROJECT"
     );
-    internal static readonly string _ADOToken = Extensions.RetreiveOrPrompt(
-        ADOTokenName,
-        prompt: "Please provide a PAT for use with Azure DevOps: ",
-        envVarName: "ADO_TOKEN"
-    );
 
     private static VssConnection? adoConnection = null;
     public async Task<VssConnection> GetAdoConnection()
@@ -36,6 +31,12 @@ public class Ado : IAdo
         {
             return adoConnection;
         }
+
+        var _ADOToken = Extensions.RetreiveOrPrompt(
+            ADOTokenName,
+            prompt: "Please provide a PAT for use with Azure DevOps: ",
+            envVarName: "ADO_TOKEN"
+        );
 
         var creds = new VssBasicCredential(string.Empty, _ADOToken);
         var connection = new VssConnection(new Uri(_CollectionUri), creds);
