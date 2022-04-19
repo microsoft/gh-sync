@@ -190,7 +190,7 @@ namespace gh_sync
         {
             if (issue.State.Value == ItemState.Open)
             {
-                return ("Active", "Approved");
+                return ("New", "Approved");
             }
             if (issue.IsLabeledAs("Resolution-Done"))
             {
