@@ -11,11 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
-    // private IAdo Ado => Startup.Services.GetRequiredService<IAdo>();
+    private IAdo MockAdo => Startup.Services.GetRequiredService<IAdo>();
     Ado Ado = new Ado();
 
     [Fact]
-    public async Task test()
+    public async Task Given_null_id_throw_exception()
     {
         Issue testIssue = new Issue();
         WorkItem testWorkItem = new WorkItem();
@@ -71,6 +71,14 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 
         await Assert.ThrowsAsync<NullReferenceException>(
             async () => await Ado.UpdateFromIssue(testWorkItem, testIssue)
+        );
+    }
+
+    [Fact]
+    public async Task test()
+    {
+        await Assert.ThrowsAsync<AuthorizationException>(
+            async () => await Ado.GetAdoConnection()
         );
     }
 }

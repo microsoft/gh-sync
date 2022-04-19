@@ -9,18 +9,28 @@ namespace gh_sync;
 
 public class Ado : IAdo
 {
+    Ado(string CollectionUri, string ProjectName, string ADOToken)
+    {
+        
+    }
     internal const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
+    internal const string AdoProjectName = "ado-project";
 
-    internal static readonly string CollectionUri = Extensions.RetreiveOrPrompt(
+    internal static readonly string _CollectionUri = Extensions.RetreiveOrPrompt(
         ADOUriName,
         prompt: "Please provide a URI for your ADO project organization: ",
         envVarName: "ADO_URL"
     );
-    internal static readonly string ProjectName = Extensions.RetreiveOrPrompt(
-        ADOUriName,
-        prompt: "Please provide a URI for your ADO project organization: ",
+    internal static readonly string _ProjectName = Extensions.RetreiveOrPrompt(
+        AdoProjectName,
+        prompt: "Please provide a name for your ADO project: ",
         envVarName: "ADO_PROJECT"
+    );
+    internal static readonly string _ADOToken = Extensions.RetreiveOrPrompt(
+        ADOTokenName,
+        prompt: "Please provide a PAT for use with Azure DevOps: ",
+        envVarName: "ADO_TOKEN"
     );
 
     private static VssConnection? adoConnection = null;
@@ -31,14 +41,8 @@ public class Ado : IAdo
             return adoConnection;
         }
 
-        var ADOToken = Extensions.RetreiveOrPrompt(
-            ADOTokenName,
-            prompt: "Please provide a PAT for use with Azure DevOps: ",
-            envVarName: "ADO_TOKEN"
-        );
-
-        var creds = new VssBasicCredential(string.Empty, ADOToken);
-        var connection = new VssConnection(new Uri(CollectionUri), creds);
+        var creds = new VssBasicCredential(string.Empty, _ADOToken);
+        var connection = new VssConnection(new Uri(_CollectionUri), creds);
         
         try
         {
@@ -73,7 +77,7 @@ public class Ado : IAdo
         {
             var batch = await WithWorkItemClient(async client =>
                 await client.GetCommentsAsync(
-                    ProjectName,
+                    _ProjectName,
                     workItem.Id.Value,
                     continuationToken: continuationToken
                 )
@@ -114,7 +118,7 @@ public class Ado : IAdo
                         {
                             Text = commentText
                         },
-                        ProjectName,
+                        _ProjectName,
                         workItem.Id.Value
                     )
                 );
@@ -133,7 +137,7 @@ public class Ado : IAdo
             {
                 var result = await client.CreateWorkItemAsync(
                     patch,
-                    ProjectName,
+                    _ProjectName,
                     issue.WorkItemType()
                 );
                 return result;
@@ -151,7 +155,7 @@ public class Ado : IAdo
                 {
                     Text = $"Work item created from public GitHub issue at {issue.Url}, using the gh-sync tool."
                 },
-                ProjectName,
+                _ProjectName,
                 newItem.Id.Value
             )
         );
