@@ -1,6 +1,5 @@
 ﻿using System.CommandLine;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using System.CommandLine.Invocation;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 
@@ -31,37 +30,26 @@ class Program
     internal record PullIssueOptions(bool DryRun, bool AllowExisting);
     private Command PullIssueCommand()
     {
+        var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
+        var issue = new Argument<int>("issue", "ID of the issue to pull into ADO.");
+        var dryRun = new Option<bool>("--dry-run", "Don't actually pull the GitHub issue into ADO.");
+        var allowExisting = new Option<bool>("--allow-existing", "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue.");
 
-        var command = new Command("pull-gh")
+        var command = new Command("pull-gh", "Pull from GitHub into ADO")
         {
-            new Argument<string>(
-                "repo",
-                description: "GitHub repository to pull the issue from."
-            ),
-
-            new Argument<int>(
-                "issue",
-                description: "ID of the issue to pull into ADO."
-            ),
-
-            new Option(
-                "--dry-run",
-                description: "Don't actually pull the GitHub issue into ADO."
-            ),
-
-            new Option(
-                "--allow-existing",
-                description: "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue."
-            )
+            repo,
+            issue,
+            dryRun,
+            allowExisting
         };
 
-        command.SetHandler<string, int, PullIssueOptions>(async (repo, issue, options) =>
+        command.SetHandler(async (string repo, int issue, bool dryRun, bool allowExisting) =>
         {
             var sync = services.GetRequiredService<ISynchronizer>();
             AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
             var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
-            await sync.PullGitHubIssue(ghIssue, options.DryRun, options.AllowExisting);
-        });
+            await sync.PullGitHubIssue(ghIssue, dryRun, allowExisting);
+        }, repo, issue, dryRun, allowExisting);
 
         return command;
 
