@@ -9,10 +9,6 @@ namespace gh_sync;
 
 public class Ado : IAdo
 {
-    Ado(string CollectionUri, string ProjectName, string ADOToken)
-    {
-        
-    }
     internal const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
     internal const string AdoProjectName = "ado-project";

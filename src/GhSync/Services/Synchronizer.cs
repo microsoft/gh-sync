@@ -60,7 +60,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
                             Value = state.State
                         }
                     },
-                    gh_sync.Ado.ProjectName, workItem.Id!.Value
+                    gh_sync.Ado._ProjectName, workItem.Id!.Value
                 );
                 // TODO: update Reason
             }
