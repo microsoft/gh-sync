@@ -18,6 +18,9 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     Ado Ado = new Ado();
 
     [Fact]
+    // <summary>
+    //      Checks that passing <c>null</c> as an issue or work item ID throws an exception.
+    // </summary>
     public async Task GivenNullIdThrowException()
     {
         Issue testIssue = new Issue();
@@ -38,6 +41,9 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     }
 
     [Fact]
+    // <summary>
+    //      Checks that passing <c>null<c> as an issue or work item throws an exception.
+    // </summary>
     public async Task GivenNullIssueThrowException()
     {
         Issue? nullIssue = null;
@@ -64,6 +70,9 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     }
 
     [Fact]
+    // <summary>
+    //      Checks that passing <c>null</c> as an issue repository throws an exception.
+    // </summary>
     public async Task GivenNullRepositoryThrowException()
     {
         Issue testIssue = new Issue();
