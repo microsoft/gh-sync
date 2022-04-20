@@ -29,8 +29,6 @@ class Program
     static async Task<int> Main(string[] args) =>
         await new Program().Invoke(args);
 
-
-    internal record PullIssueOptions(bool DryRun, bool AllowExisting);
     private Command PullIssueCommand()
     {
         var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
@@ -60,26 +58,18 @@ class Program
     internal record PullAllIssueOptions(bool DryRun, bool AllowExisting);
     private Command PullAllIssuesCommand()
     {
-
+        var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
+        var dryRun = new Option<bool>("--dry-run", "Don't actually pull the GitHub issue into ADO.");
+        var allowExisting = new Option<bool>("--allow-existing", "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue.");
+        
         var command = new Command("pull-all-gh")
         {
-            new Argument<string>(
-                "repo",
-                description: "GitHub repository to pull the issue from."
-            ),
-
-            new Option(
-                "--dry-run",
-                description: "Don't actually pull the GitHub issue into ADO."
-            ),
-
-            new Option(
-                "--allow-existing",
-                description: "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue."
-            )
+            repo,
+            dryRun,
+            allowExisting
         };
 
-        command.SetHandler<string, PullAllIssueOptions>(async (repo, options) =>
+        command.SetHandler(async (string repo, bool dryRun, bool allowExisting) =>
         {
             var sync = services.GetRequiredService<ISynchronizer>();
             await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
@@ -89,11 +79,11 @@ class Program
                     foreach (var issue in ghIssues)
                     {
                         ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
-                        await sync.PullGitHubIssue(issue, options.DryRun, options.AllowExisting);
+                        await sync.PullGitHubIssue(issue, dryRun, allowExisting);
                     }
                     AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
                 });
-        });
+        }, repo, dryRun, allowExisting);
 
         return command;
 
@@ -101,10 +91,11 @@ class Program
 
     private Command GetAdoWorkItemCommand()
     {
+        var id = new Argument<int>("id", "The id of the ADO work item.");
 
         var command = new Command("get-ado")
         {
-            new Argument<int>("id")
+            id
         };
 
         command.SetHandler<int>(async (id) =>
@@ -114,7 +105,7 @@ class Program
                 await client.GetWorkItemAsync(Ado._ProjectName, id, expand: WorkItemExpand.Relations)
             );
             workItem.WriteToConsole();
-        });
+        }, id);
 
         return command;
 
@@ -122,20 +113,13 @@ class Program
 
     private Command FindAdoWorkItemCommand()
     {
+        var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
+        var issue = new Argument<int>("issue", "ID of the issue to pull into ADO.");
 
         var command = new Command("find-ado")
         {
-
-            new Argument<string>(
-                "repo",
-                description: "GitHub repository to find the issue from."
-            ),
-
-            new Argument<int>(
-                "issue",
-                description: "ID of the issue to find an ADO work item from."
-            )
-
+            repo,
+            issue
         };
 
         command.SetHandler<string, int>(async (repo, issue) =>
@@ -152,7 +136,7 @@ class Program
             {
                 AnsiConsole.MarkupLine($"No ADO work item found for {repo}#{issue}.");
             }
-        });
+        }, repo, issue);
 
         return command;
 
