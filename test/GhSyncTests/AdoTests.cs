@@ -18,7 +18,7 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     Ado Ado = new Ado();
 
     [Fact]
-    public async Task Given_null_id_throw_exception()
+    public async Task GivenNullIdThrowException()
     {
         Issue testIssue = new Issue();
         WorkItem testWorkItem = new WorkItem();
@@ -38,7 +38,7 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     }
 
     [Fact]
-    public async Task Given_null_issue_throw_exception()
+    public async Task GivenNullIssueThrowException()
     {
         Issue? nullIssue = null;
         var testWorkItem = new WorkItem()
@@ -64,7 +64,7 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     }
 
     [Fact]
-    public async Task Given_null_repository_throw_exception()
+    public async Task GivenNullRepositoryThrowException()
     {
         Issue testIssue = new Issue();
         WorkItem testWorkItem = new WorkItem();
