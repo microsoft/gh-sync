@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 global using System;
 global using System.Threading.Tasks;
 global using System.Collections.Generic;

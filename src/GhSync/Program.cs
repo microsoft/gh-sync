@@ -1,4 +1,7 @@
-﻿using System.CommandLine;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System.CommandLine;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
@@ -52,7 +55,6 @@ class Program
         }, repo, issue, dryRun, allowExisting);
 
         return command;
-
     }
 
     internal record PullAllIssueOptions(bool DryRun, bool AllowExisting);
