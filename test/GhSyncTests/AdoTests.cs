@@ -41,8 +41,10 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     public async Task Given_null_issue_throw_exception()
     {
         Issue? nullIssue = null;
-        WorkItem testWorkItem = new WorkItem();
-        testWorkItem.Id = 0;
+        var testWorkItem = new WorkItem()
+        {
+            Id = 0
+        };
 
         await Assert.ThrowsAsync<ArgumentNullException>(
             async () => await Ado.UpdateCommentsFromIssue(testWorkItem, nullIssue).ToListAsync()
