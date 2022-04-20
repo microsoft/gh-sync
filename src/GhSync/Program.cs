@@ -29,13 +29,8 @@ class Program
     static async Task<int> Main(string[] args) =>
         await new Program().Invoke(args);
 
-    private Command PullIssueCommand()
+    private Command PullIssueCommand(Argument<string> repo, Argument<int> issue, Option<bool> dryRun, Option<bool> allowExisting)
     {
-        var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
-        var issue = new Argument<int>("issue", "ID of the issue to pull into ADO.");
-        var dryRun = new Option<bool>("--dry-run", "Don't actually pull the GitHub issue into ADO.");
-        var allowExisting = new Option<bool>("--allow-existing", "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue.");
-
         var command = new Command("pull-gh", "Pull from GitHub into ADO")
         {
             repo,
@@ -56,12 +51,8 @@ class Program
     }
 
     internal record PullAllIssueOptions(bool DryRun, bool AllowExisting);
-    private Command PullAllIssuesCommand()
+    private Command PullAllIssuesCommand(Argument<string> repo, Option<bool> dryRun, Option<bool> allowExisting)
     {
-        var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
-        var dryRun = new Option<bool>("--dry-run", "Don't actually pull the GitHub issue into ADO.");
-        var allowExisting = new Option<bool>("--allow-existing", "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue.");
-        
         var command = new Command("pull-all-gh")
         {
             repo,
@@ -89,10 +80,8 @@ class Program
 
     }
 
-    private Command GetAdoWorkItemCommand()
+    private Command GetAdoWorkItemCommand(Argument<int> id)
     {
-        var id = new Argument<int>("id", "The id of the ADO work item.");
-
         var command = new Command("get-ado")
         {
             id
@@ -111,11 +100,8 @@ class Program
 
     }
 
-    private Command FindAdoWorkItemCommand()
+    private Command FindAdoWorkItemCommand(Argument<string> repo, Argument<int> issue)
     {
-        var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
-        var issue = new Argument<int>("issue", "ID of the issue to pull into ADO.");
-
         var command = new Command("find-ado")
         {
             repo,
@@ -144,13 +130,20 @@ class Program
 
     async Task<int> Invoke(string[] args)
     {
+        var id = new Argument<int>("id", "The id of the ADO work item.");
+        var repo = new Argument<string>("repo", "GitHub repository to pull the issue from.");
+        var issue = new Argument<int>("issue", "ID of the issue to pull into ADO.");
+        var dryRun = new Option<bool>("--dry-run", "Don't actually pull the GitHub issue into ADO.");
+        var allowExisting = new Option<bool>("--allow-existing", "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue.");
+
         var rootCommand = new RootCommand
         {
-            PullIssueCommand(),
-            PullAllIssuesCommand(),
-            GetAdoWorkItemCommand(),
-            FindAdoWorkItemCommand()
+            PullIssueCommand(repo, issue, dryRun, allowExisting),
+            PullAllIssuesCommand(repo, dryRun, allowExisting),
+            GetAdoWorkItemCommand(id),
+            FindAdoWorkItemCommand(repo, issue)
         };
+
         var attachOption = new Option<bool>("--attach", "Attaches a debugger before running.");
         rootCommand.AddOption(attachOption);
 
