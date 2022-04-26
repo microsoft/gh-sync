@@ -11,6 +11,18 @@ using Moq;
 
 namespace gh_sync.Tests;
 
+internal static class MockServiceExtensions
+{
+    public static IServiceCollection AddMock<T>(this IServiceCollection services, Action<Mock<T>>? configure = null)
+    where T: class
+    {
+        var mock = new Mock<T>();
+        configure?.Invoke(mock);
+        services.AddSingleton<T>(mock.Object);
+        return services;
+    }
+}
+
 public class MockStartup
 {
     private readonly Lazy<IServiceProvider> services;
@@ -28,17 +40,13 @@ public class MockStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<IAdo>(
-            new Moq.Mock<IAdo>().Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>())).Returns(Task.FromResult(new WorkItem()))
-            .Object
+        services.AddMock<IAdo>(mock => mock
+            .Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>()))
+            .Returns(Task.FromResult(new WorkItem()))
         );
-        services.AddSingleton<IGitHub>(
-            new Moq.Mock<IGitHub>()
-            .Object
+        services.AddMock<IGitHub>(
         );
-        services.AddSingleton<ISynchronizer>(
-            new Moq.Mock<ISynchronizer>()
-            .Object
+        services.AddMock<ISynchronizer>(
         );
     }
 }
