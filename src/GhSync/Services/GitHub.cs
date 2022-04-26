@@ -83,19 +83,36 @@ public class GitHub : IGitHub
             });
     }
 
-    public static async Task<Issue> GetGitHubIssue(string repo, int id)
+    public static async Task<Issue> GetGitHubIssue(string repo, int issueId)
     {
+        AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issueId}...");
         var parts = repo.Split("/", 2);
         return await WithClient(async client =>
         {
             AnsiConsole.MarkupLine("[white]Got GitHub client.[/]");
             var repository = await client.Repository.Get(parts[0], parts[1]);
             AnsiConsole.MarkupLine($"[white]Got repository: {repository.HtmlUrl}.[/]");
-            var issue = await client.Issue.Get(repositoryId: repository.Id, id);
+            var issue = await client.Issue.Get(repositoryId: repository.Id, issueId);
             AnsiConsole.MarkupLine($"[white]Got issue: {issue.HtmlUrl}.[/]");
             issue.AddRepoMetadata(repository);
             return issue;
         });
     }
 
+    public static async Task PullAllIssues(IServiceProvider services, string repo, bool dryRun, bool allowExisting)
+    {
+        var sync = services.GetRequiredService<ISynchronizer>();
+        await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
+            $"Getting all GitHub issues from {repo}...", async ctx =>
+            {
+                var ghIssues = (await GitHub.GetGitHubIssuesFromRepo(repo)).ToList();
+                foreach (var issue in ghIssues)
+                {
+                    ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
+                    await sync.PullGitHubIssue(issue, dryRun, allowExisting);
+                }
+                AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
+            }
+        );
+    }
 }

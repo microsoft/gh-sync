@@ -39,11 +39,10 @@ class Program
             allowExisting
         };
 
-        command.SetHandler(async (string repo, int issue, bool dryRun, bool allowExisting) =>
+        command.SetHandler(async (string repo, int issueId, bool dryRun, bool allowExisting) =>
         {
             var sync = services.GetRequiredService<ISynchronizer>();
-            AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
-            var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
+            var ghIssue = await GitHub.GetGitHubIssue(repo, issueId);
             await sync.PullGitHubIssue(ghIssue, dryRun, allowExisting);
         }, repo, issue, dryRun, allowExisting);
 
@@ -62,18 +61,7 @@ class Program
 
         command.SetHandler(async (string repo, bool dryRun, bool allowExisting) =>
         {
-            var sync = services.GetRequiredService<ISynchronizer>();
-            await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
-                $"Getting all GitHub issues from {repo}...", async ctx =>
-                {
-                    var ghIssues = (await GitHub.GetGitHubIssuesFromRepo(repo)).ToList();
-                    foreach (var issue in ghIssues)
-                    {
-                        ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
-                        await sync.PullGitHubIssue(issue, dryRun, allowExisting);
-                    }
-                    AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
-                });
+            await GitHub.PullAllIssues(services, repo, dryRun, allowExisting);
         }, repo, dryRun, allowExisting);
 
         return command;
@@ -111,7 +99,6 @@ class Program
         command.SetHandler<string, int>(async (repo, issue) =>
         {
             var ado = services.GetRequiredService<IAdo>();
-            AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issue}...");
             var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
             var workItem = await ado.GetAdoWorkItem(ghIssue);
             if (workItem != null)
