@@ -15,7 +15,11 @@ using Microsoft.Extensions.DependencyInjection;
 public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
     private IAdo MockAdo => Startup.Services.GetRequiredService<IAdo>();
+    private IGitHub MockGh => Startup.Services.GetRequiredService<IGitHub>();
+    private ISynchronizer MockSync => Startup.Services.GetRequiredService<ISynchronizer>();
+
     Ado Ado = new Ado();
+    GitHub GitHub = new GitHub();
 
     [Fact]
     // <summary>
@@ -32,7 +36,7 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
         );
 
         await Assert.ThrowsAsync<NullReferenceException>(
-            async () => await Ado.UpdateCommentsFromIssue(testWorkItem, testIssue).ToListAsync()
+            async () => await Ado.UpdateCommentsFromIssue(Startup.Services, testWorkItem, testIssue).ToListAsync()
         );
 
         await Assert.ThrowsAsync<NullReferenceException>(
@@ -53,11 +57,11 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
         };
 
         await Assert.ThrowsAsync<ArgumentNullException>(
-            async () => await Ado.UpdateCommentsFromIssue(testWorkItem, nullIssue).ToListAsync()
+            async () => await Ado.UpdateCommentsFromIssue(Startup.Services, testWorkItem, nullIssue).ToListAsync()
         );
 
         await Assert.ThrowsAsync<ArgumentNullException>(
-            async () => await Ado.PullWorkItemFromIssue(nullIssue)
+            async () => await Ado.PullWorkItemFromIssue(Startup.Services, nullIssue)
         );
 
         await Assert.ThrowsAsync<ArgumentNullException>(
@@ -80,7 +84,7 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
         testWorkItem.Id = 0;
 
         await Assert.ThrowsAsync<NullReferenceException>(
-            async () => await Ado.PullWorkItemFromIssue(testIssue)
+            async () => await Ado.PullWorkItemFromIssue(Startup.Services, testIssue)
         );
 
         await Assert.ThrowsAsync<NullReferenceException>(

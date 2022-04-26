@@ -28,5 +28,13 @@ public class MockStartup
             // TODO: .Setup call here.
             .Object
         );
+        services.AddSingleton<IGitHub>(
+            new Moq.Mock<IGitHub>()
+            .Object
+        );
+        services.AddSingleton<ISynchronizer>(
+            new Moq.Mock<ISynchronizer>()
+            .Object
+        );
     }
 }
