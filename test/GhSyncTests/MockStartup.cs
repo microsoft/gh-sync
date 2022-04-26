@@ -2,7 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using Octokit;
+
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using System.Threading.Tasks;
+using Moq;
 
 namespace gh_sync.Tests;
 
@@ -24,8 +29,7 @@ public class MockStartup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IAdo>(
-            new Moq.Mock<IAdo>()
-            // TODO: .Setup call here.
+            new Moq.Mock<IAdo>().Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>())).Returns(Task.FromResult(new WorkItem()))
             .Object
         );
         services.AddSingleton<IGitHub>(
