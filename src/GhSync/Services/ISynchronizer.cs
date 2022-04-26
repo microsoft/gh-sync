@@ -12,7 +12,7 @@ namespace gh_sync;
 public interface ISynchronizer
 {
 
-    Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false);
+    Task PullGitHubIssue(IServiceProvider services, Issue ghIssue, bool dryRun = false, bool allowExisting = false);
 
     Task<WorkItem> UpdateState(WorkItem workItem, Issue issue);
 

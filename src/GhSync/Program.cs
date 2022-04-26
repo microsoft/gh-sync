@@ -42,8 +42,10 @@ class Program
         command.SetHandler(async (string repo, int issueId, bool dryRun, bool allowExisting) =>
         {
             var sync = services.GetRequiredService<ISynchronizer>();
-            var ghIssue = await GitHub.GetGitHubIssue(repo, issueId);
-            await sync.PullGitHubIssue(ghIssue, dryRun, allowExisting);
+            var gh = services.GetRequiredService<IGitHub>();
+
+            var ghIssue = await gh.GetGitHubIssue(repo, issueId);
+            await sync.PullGitHubIssue(services, ghIssue, dryRun, allowExisting);
         }, repo, issue, dryRun, allowExisting);
 
         return command;
@@ -61,7 +63,8 @@ class Program
 
         command.SetHandler(async (string repo, bool dryRun, bool allowExisting) =>
         {
-            await GitHub.PullAllIssues(services, repo, dryRun, allowExisting);
+            var gh = services.GetRequiredService<IGitHub>();
+            await gh.PullAllIssues(services, repo, dryRun, allowExisting);
         }, repo, dryRun, allowExisting);
 
         return command;
@@ -99,7 +102,9 @@ class Program
         command.SetHandler<string, int>(async (repo, issue) =>
         {
             var ado = services.GetRequiredService<IAdo>();
-            var ghIssue = await GitHub.GetGitHubIssue(repo, issue);
+            var gh = services.GetRequiredService<IGitHub>();
+
+            var ghIssue = await gh.GetGitHubIssue(repo, issue);
             var workItem = await ado.GetAdoWorkItem(ghIssue);
             if (workItem != null)
             {

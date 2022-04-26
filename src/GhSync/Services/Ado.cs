@@ -92,15 +92,16 @@ public class Ado : IAdo
     }
 
 
-    public async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue? issue)
+    public async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(IServiceProvider services, WorkItem workItem, Issue? issue)
     {
+        var gh = services.GetRequiredService<IGitHub>();
+        
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (workItem.Id == null)
         {
             throw new NullReferenceException($"New work item {workItem.Url} did not have an ID; could not add comment text.");
         }
-
-        var ghComments = await GitHub.WithClient(async client =>
+        var ghComments = await gh.WithClient(async client =>
             await client.Issue.Comment.GetAllForIssue(issue.Repository.Id, issue.Number)
         );
         var adoComments = await EnumerateComments(workItem).ToListAsync();
@@ -126,7 +127,7 @@ public class Ado : IAdo
         }
     }
 
-    public async Task<WorkItem> PullWorkItemFromIssue(Issue? issue)
+    public async Task<WorkItem> PullWorkItemFromIssue(IServiceProvider services, Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (issue.Repository == null) throw new NullReferenceException($"Issue {issue.Title} did not have an associated repository.");
@@ -160,7 +161,7 @@ public class Ado : IAdo
             )
         );
 
-        var nCommentsAdded = await UpdateCommentsFromIssue(newItem, issue).CountAsync();
+        var nCommentsAdded = await UpdateCommentsFromIssue(services, newItem, issue).CountAsync();
         AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
         return newItem;
     }

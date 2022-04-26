@@ -8,7 +8,7 @@ namespace gh_sync;
 
 public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
 {
-    public async Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false)
+    public async Task PullGitHubIssue(IServiceProvider services, Issue ghIssue, bool dryRun = false, bool allowExisting = false)
     {
         // Check if there's already a work item.
         var workItem = await Ado.GetAdoWorkItem(ghIssue);
@@ -23,7 +23,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
                     await Ado.UpdateFromIssue(workItem, ghIssue);
                     AnsiConsole.MarkupLine("Updating issue state...");
                     await UpdateState(workItem, ghIssue);
-                    var nCommentsAdded = await Ado.UpdateCommentsFromIssue(workItem, ghIssue).CountAsync();
+                    var nCommentsAdded = await Ado.UpdateCommentsFromIssue(services, workItem, ghIssue).CountAsync();
                     AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
                 }
                 else
@@ -38,7 +38,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
 
         if (!dryRun)
         {
-            var newWorkItem = await Ado.PullWorkItemFromIssue(ghIssue);
+            var newWorkItem = await Ado.PullWorkItemFromIssue(services, ghIssue);
             await UpdateState(newWorkItem, ghIssue);
             AnsiConsole.MarkupLine($@"Created new work item: {newWorkItem.ReadableLink()}");
         }

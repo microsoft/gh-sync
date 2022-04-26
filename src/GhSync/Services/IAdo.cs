@@ -14,11 +14,11 @@ public interface IAdo
 
     Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation);
 
-    IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue? issue);
+    IAsyncEnumerable<Comment> UpdateCommentsFromIssue(IServiceProvider services, WorkItem workItem, Issue? issue);
 
     IAsyncEnumerable<Comment> EnumerateComments(WorkItem workItem);
 
-    Task<WorkItem> PullWorkItemFromIssue(Issue? issue);
+    Task<WorkItem> PullWorkItemFromIssue(IServiceProvider services, Issue? issue);
 
     Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue);
 

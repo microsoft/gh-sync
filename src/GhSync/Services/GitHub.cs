@@ -13,7 +13,7 @@ public class GitHub : IGitHub
     internal const string TrackingLabel = "tracking";
 
     private static GitHubClient? ghClient = null;
-    internal static async Task<GitHubClient> GetClient()
+    public async Task<GitHubClient> GetClient()
     {
         if (ghClient != null)
         {
@@ -56,10 +56,10 @@ public class GitHub : IGitHub
         throw new AuthorizationException();
     }
 
-    internal static Task<TResult> WithClient<TResult>(Func<GitHubClient, Task<TResult>> continuation) =>
+    public Task<TResult> WithClient<TResult>(Func<GitHubClient, Task<TResult>> continuation) =>
         GetClient().Bind(continuation);
 
-    public static async Task<IEnumerable<Issue>> GetGitHubIssuesFromRepo(string repo)
+    public async Task<IEnumerable<Issue>> GetGitHubIssuesFromRepo(string repo)
     {
         var parts = repo.Split("/", 2);
         var repository = await WithClient(async client => await client.Repository.Get(parts[0], parts[1]));
@@ -83,7 +83,7 @@ public class GitHub : IGitHub
             });
     }
 
-    public static async Task<Issue> GetGitHubIssue(string repo, int issueId)
+    public async Task<Issue> GetGitHubIssue(string repo, int issueId)
     {
         AnsiConsole.MarkupLine($"Getting GitHub issue {repo}#{issueId}...");
         var parts = repo.Split("/", 2);
@@ -99,17 +99,17 @@ public class GitHub : IGitHub
         });
     }
 
-    public static async Task PullAllIssues(IServiceProvider services, string repo, bool dryRun, bool allowExisting)
+    public async Task PullAllIssues(IServiceProvider services, string repo, bool dryRun, bool allowExisting)
     {
         var sync = services.GetRequiredService<ISynchronizer>();
         await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
             $"Getting all GitHub issues from {repo}...", async ctx =>
             {
-                var ghIssues = (await GitHub.GetGitHubIssuesFromRepo(repo)).ToList();
+                var ghIssues = (await GetGitHubIssuesFromRepo(repo)).ToList();
                 foreach (var issue in ghIssues)
                 {
                     ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
-                    await sync.PullGitHubIssue(issue, dryRun, allowExisting);
+                    await sync.PullGitHubIssue(services, issue, dryRun, allowExisting);
                 }
                 AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
             }
