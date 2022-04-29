@@ -10,15 +10,11 @@ namespace gh_sync;
 
 public interface IAdo
 {
-    Task<VssConnection> GetAdoConnection();
 
     Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation);
 
-    IAsyncEnumerable<Comment> UpdateCommentsFromIssue(IServiceProvider services, WorkItem workItem, Issue? issue);
-
     IAsyncEnumerable<Comment> EnumerateComments(WorkItem workItem);
 
-    Task<WorkItem> PullWorkItemFromIssue(IServiceProvider services, Issue? issue);
 
     Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue);
 

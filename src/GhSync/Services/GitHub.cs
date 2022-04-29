@@ -12,8 +12,8 @@ public class GitHub : IGitHub
     private const string OrgName = "microsoft";
     internal const string TrackingLabel = "tracking";
 
-    private static GitHubClient? ghClient = null;
-    public async Task<GitHubClient> GetClient()
+    private static IGitHubClient? ghClient = null;
+    public async Task<IGitHubClient> GetClient()
     {
         if (ghClient != null)
         {
@@ -56,7 +56,7 @@ public class GitHub : IGitHub
         throw new AuthorizationException();
     }
 
-    public Task<TResult> WithClient<TResult>(Func<GitHubClient, Task<TResult>> continuation) =>
+    public Task<TResult> WithClient<TResult>(Func<IGitHubClient, Task<TResult>> continuation) =>
         GetClient().Bind(continuation);
 
     public async Task<IEnumerable<Issue>> GetGitHubIssuesFromRepo(string repo)
@@ -97,22 +97,5 @@ public class GitHub : IGitHub
             issue.AddRepoMetadata(repository);
             return issue;
         });
-    }
-
-    public async Task PullAllIssues(IServiceProvider services, string repo, bool dryRun, bool allowExisting)
-    {
-        var sync = services.GetRequiredService<ISynchronizer>();
-        await AnsiConsole.Status().Spinner(Spinner.Known.Aesthetic).StartAsync(
-            $"Getting all GitHub issues from {repo}...", async ctx =>
-            {
-                var ghIssues = (await GetGitHubIssuesFromRepo(repo)).ToList();
-                foreach (var issue in ghIssues)
-                {
-                    ctx.Status($"Pulling {issue.Repository.Owner.Name}/{issue.Repository.Name}#{issue.Number}: {issue.Title.Replace("[", "[[").Replace("]", "]]")}...");
-                    await sync.PullGitHubIssue(services, issue, dryRun, allowExisting);
-                }
-                AnsiConsole.MarkupLine($"Pulled {ghIssues.Count} issues from {repo} into ADO.");
-            }
-        );
     }
 }

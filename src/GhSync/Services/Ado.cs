@@ -10,7 +10,7 @@ using Octokit;
 
 namespace gh_sync;
 
-public class Ado : IAdo
+public record class Ado() : IAdo
 {
     internal const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
@@ -43,7 +43,7 @@ public class Ado : IAdo
 
         var creds = new VssBasicCredential(string.Empty, _ADOToken);
         var connection = new VssConnection(new Uri(_CollectionUri), creds);
-        
+
         try
         {
             await connection.ConnectAsync();
@@ -91,80 +91,6 @@ public class Ado : IAdo
         while (continuationToken != null);
     }
 
-
-    public async IAsyncEnumerable<Comment> UpdateCommentsFromIssue(IServiceProvider services, WorkItem workItem, Issue? issue)
-    {
-        var gh = services.GetRequiredService<IGitHub>();
-        
-        if (issue == null) throw new ArgumentNullException(nameof(issue));
-        if (workItem.Id == null)
-        {
-            throw new NullReferenceException($"New work item {workItem.Url} did not have an ID; could not add comment text.");
-        }
-        var ghComments = await gh.WithClient(async client =>
-            await client.Issue.Comment.GetAllForIssue(issue.Repository.Id, issue.Number)
-        );
-        var adoComments = await EnumerateComments(workItem).ToListAsync();
-
-        foreach (var ghComment in ghComments)
-        {
-            var sigilString = $"[gh-sync: {ghComment.HtmlUrl}]";
-            if (!adoComments.Any(comment => comment.Text.Contains(sigilString)))
-            {
-                // Need to post a new comment.
-                var commentText = $"<a href=\"{ghComment.HtmlUrl}\">GitHub comment by @{ghComment.User.Login}:</a>\n\n{ghComment.Body.MarkdownToHtml()}\n\n<br><hr><span style=\"font-size: 8px\">{sigilString}</span>";
-                yield return await WithWorkItemClient(async client =>
-                    await client.AddCommentAsync(
-                        new CommentCreate
-                        {
-                            Text = commentText
-                        },
-                        _ProjectName,
-                        workItem.Id.Value
-                    )
-                );
-            }
-        }
-    }
-
-    public async Task<WorkItem> PullWorkItemFromIssue(IServiceProvider services, Issue? issue)
-    {
-        if (issue == null) throw new ArgumentNullException(nameof(issue));
-        if (issue.Repository == null) throw new NullReferenceException($"Issue {issue.Title} did not have an associated repository.");
-        
-        var patch = issue.AsPatch();
-
-        var newItem = await WithWorkItemClient(async client =>
-            {
-                var result = await client.CreateWorkItemAsync(
-                    patch,
-                    _ProjectName,
-                    issue.WorkItemType()
-                );
-                return result;
-            }
-        );
-
-        if (newItem.Id == null)
-        {
-            throw new Exception($"New work item {newItem.Url} did not have an ID; could not add comment text.");
-        }
-
-        await WithWorkItemClient(async (client) =>
-            await client.AddCommentAsync(
-                new CommentCreate
-                {
-                    Text = $"Work item created from public GitHub issue at {issue.Url}, using the gh-sync tool."
-                },
-                _ProjectName,
-                newItem.Id.Value
-            )
-        );
-
-        var nCommentsAdded = await UpdateCommentsFromIssue(services, newItem, issue).CountAsync();
-        AnsiConsole.MarkupLine($"Added {nCommentsAdded} comments from GitHub issue.");
-        return newItem;
-    }
 
     public async Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue)
     {

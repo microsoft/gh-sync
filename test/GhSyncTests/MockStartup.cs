@@ -40,10 +40,22 @@ public class MockStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddMock<IAdo>(mock => mock
-            .Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>()))
-            .Returns(Task.FromResult(new WorkItem()))
-        );
+        services.AddMock<IAdo>(mock =>
+        {
+            mock
+                .Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>()))
+                .Returns(Task.FromResult(new WorkItem()));
+            mock
+                .Setup(arg => arg.GetAdoWorkItem(It.IsAny<Issue>()))
+                .Returns(
+                    Task.FromResult<WorkItem?>(new()
+                    {
+                        Url = "https://mock.visualstudio.com",
+                        Id = 12345,
+                        Links = new()
+                    })
+                );
+        });
         services.AddMock<IGitHub>(
         );
         services.AddMock<ISynchronizer>(

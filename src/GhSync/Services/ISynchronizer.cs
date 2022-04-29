@@ -12,8 +12,12 @@ namespace gh_sync;
 public interface ISynchronizer
 {
 
-    Task PullGitHubIssue(IServiceProvider services, Issue ghIssue, bool dryRun = false, bool allowExisting = false);
+    Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false);
 
     Task<WorkItem> UpdateState(WorkItem workItem, Issue issue);
+
+    IAsyncEnumerable<Comment> UpdateCommentsFromIssue(WorkItem workItem, Issue? issue);
+    Task<WorkItem> PullWorkItemFromIssue(Issue? issue);
+    Task PullAllIssues(string repo, bool dryRun, bool allowExisting);
 
 }

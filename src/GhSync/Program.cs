@@ -45,7 +45,7 @@ class Program
             var gh = services.GetRequiredService<IGitHub>();
 
             var ghIssue = await gh.GetGitHubIssue(repo, issueId);
-            await sync.PullGitHubIssue(services, ghIssue, dryRun, allowExisting);
+            await sync.PullGitHubIssue(ghIssue, dryRun, allowExisting);
         }, repo, issue, dryRun, allowExisting);
 
         return command;
@@ -63,8 +63,8 @@ class Program
 
         command.SetHandler(async (string repo, bool dryRun, bool allowExisting) =>
         {
-            var gh = services.GetRequiredService<IGitHub>();
-            await gh.PullAllIssues(services, repo, dryRun, allowExisting);
+            var sync = services.GetRequiredService<ISynchronizer>();
+            await sync.PullAllIssues(repo, dryRun, allowExisting);
         }, repo, dryRun, allowExisting);
 
         return command;
