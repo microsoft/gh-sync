@@ -17,6 +17,11 @@ using System.IO;
 
 public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
+    internal const string mockUrl = "https://mock.visualstudio.com";
+    internal const string foundItemMsg = "Found existing work item:";
+    internal const string updateIssNoAllowExistingMsg = "Updating existing issue, since --allow-existing was not set.";
+    internal const string noUpdateDryRunMsg = "Not updating new work item in ADO, as --dry-run was set.";
+
     private Lazy<ISynchronizer> synchronizerLazy = new Lazy<ISynchronizer>(
         () => ActivatorUtilities.CreateInstance<Synchronizer>(Startup.Services)
     );
@@ -37,14 +42,26 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         try
         {
             await Synchronizer.PullGitHubIssue(
-                new Issue(
+                newIssue(),
+                dryRun: true
+            );
+            Assert.Equal($"{foundItemMsg} {mockUrl}\r\n{updateIssNoAllowExistingMsg}\r\n{noUpdateDryRunMsg}\r\n", writer.ToString());
+        }
+        finally
+        {
+            AnsiConsole.Console.Profile.Out = oldWriter;
+        }
+    }
+
+    private Issue newIssue(string title = "") {
+        return new Issue(
                     "",
                     "",
                     "",
                     "",
-                    123456,
+                    number: 123456,
                     ItemState.Open,
-                    title: "Mock issue",
+                    title: title,
                     body: "",
                     closedBy: null,
                     user: null,
@@ -62,15 +79,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
                     locked: false,
                     repository: new Repository(),
                     reactions: null
-                ),
-                dryRun: true
-            );
-            Assert.Equal("", writer.ToString());
-        }
-        finally
-        {
-            AnsiConsole.Console.Profile.Out = oldWriter;
-        }
+                );
     }
 
 }
