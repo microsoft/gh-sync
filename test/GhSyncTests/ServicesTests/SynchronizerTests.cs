@@ -21,6 +21,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     internal const string foundItemMsg = "Found existing work item:";
     internal const string updateIssNoAllowExistingMsg = "Updating existing issue, since --allow-existing was not set.";
     internal const string noUpdateDryRunMsg = "Not updating new work item in ADO, as --dry-run was set.";
+    internal const string notCreatingAsDryRunMsg = "Not creating new work item in ADO, as --dry-run was set.";
 
     private Lazy<ISynchronizer> synchronizerLazy = new Lazy<ISynchronizer>(
         () => ActivatorUtilities.CreateInstance<Synchronizer>(Startup.Services)
@@ -42,10 +43,30 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         try
         {
             await Synchronizer.PullGitHubIssue(
-                newIssue(),
+                newIssue("PullIssueDryRunWorksWhenWorkItemExists"),
                 dryRun: true
             );
             Assert.Equal($"{foundItemMsg} {mockUrl}\r\n{updateIssNoAllowExistingMsg}\r\n{noUpdateDryRunMsg}\r\n", writer.ToString());
+        }
+        finally
+        {
+            AnsiConsole.Console.Profile.Out = oldWriter;
+        }
+    }
+
+    [Fact]
+    public async Task PullIssueDryRunWorksWhenItemDoesNotExist()
+    {
+        var oldWriter = AnsiConsole.Console.Profile.Out;
+        var writer = new StringWriter();
+        AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
+        try
+        {
+            await Synchronizer.PullGitHubIssue(
+                newIssue("PullIssueDryRunWorksWhenItemDoesNotExist"),
+                dryRun: true
+            );
+            Assert.Equal($"{notCreatingAsDryRunMsg}\r\n", writer.ToString());
         }
         finally
         {

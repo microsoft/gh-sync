@@ -9,6 +9,18 @@ using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using System.Threading.Tasks;
 using Moq;
 
+using Xunit;
+using gh_sync;
+using System;
+using Octokit;
+using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using Spectre.Console;
+using System.IO;
+
 namespace gh_sync.Tests;
 
 internal static class MockServiceExtensions
@@ -25,6 +37,7 @@ internal static class MockServiceExtensions
 
 public class MockStartup
 {
+    private Issue testIssue = new Issue();
     private readonly Lazy<IServiceProvider> services;
     public IServiceProvider Services => services.Value;
 
@@ -46,7 +59,7 @@ public class MockStartup
                 .Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>()))
                 .Returns(Task.FromResult(new WorkItem()));
             mock
-                .Setup(arg => arg.GetAdoWorkItem(It.IsAny<Issue>()))
+                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(thing => thing.Title == "PullIssueDryRunWorksWhenWorkItemExists")))
                 .Returns(
                     Task.FromResult<WorkItem?>(new()
                     {
@@ -55,10 +68,44 @@ public class MockStartup
                         Links = new()
                     })
                 );
+            mock
+                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(thing => thing.Title == "PullIssueDryRunWorksWhenItemDoesNotExist")))
+                .Returns(
+                    Task.FromResult<WorkItem?>(null)
+                );
         });
         services.AddMock<IGitHub>(
         );
         services.AddMock<ISynchronizer>(
         );
+    }
+
+    private Issue newIssue(string title = "") {
+        return new Issue(
+                    "",
+                    "",
+                    "",
+                    "",
+                    number: 123456,
+                    ItemState.Open,
+                    title: title,
+                    body: "",
+                    closedBy: null,
+                    user: null,
+                    labels: new List<Label>().AsReadOnly(),
+                    assignee: null,
+                    assignees: new List<User>().AsReadOnly(),
+                    milestone: null,
+                    comments: 12,
+                    pullRequest: null,
+                    closedAt: null,
+                    createdAt: DateTimeOffset.Now,
+                    updatedAt: DateTimeOffset.Now,
+                    id: 1234567,
+                    nodeId: "",
+                    locked: false,
+                    repository: new Repository(),
+                    reactions: null
+                );
     }
 }
