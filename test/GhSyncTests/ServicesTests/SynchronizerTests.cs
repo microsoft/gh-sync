@@ -9,9 +9,11 @@ using System;
 using Octokit;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using System.Collections.Generic;
 using Spectre.Console;
 using System.IO;
+using System.Linq;
 
 public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
@@ -22,6 +24,15 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     internal const string notCreatingAsDryRunMsg = "Not creating new work item in ADO, as --dry-run was set.";
     internal const string createNewAllowExistingMsg = "Creating new work item, since --allow-existing was set.";
 
+    private Issue testIssue = new Issue();
+    private Issue? nullIssue = null;
+    private WorkItem testWorkItem = new()
+    {
+        Url = "https://mock.visualstudio.com",
+        Id = 12345,
+        Links = new()
+    };
+    
     private Lazy<ISynchronizer> synchronizerLazy = new Lazy<ISynchronizer>(
         () => ActivatorUtilities.CreateInstance<Synchronizer>(Startup.Services)
     );
@@ -95,22 +106,41 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     }
 
     [Fact]
-    public async Task PullIssueWhenWorkItemDoesNotExist()
+    public async Task UpdateCommentsFromIssueThrowsExceptionGivenNullIssue()
+    {   
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            async () => await Synchronizer.UpdateCommentsFromIssue(testWorkItem, nullIssue).ToListAsync()
+        );
+    }
+
+    [Fact]
+    public async Task UpdateCommentsFromIssueThrowsExceptionGivenNullWorkItem()
     {
-        var oldWriter = AnsiConsole.Console.Profile.Out;
-        var writer = new StringWriter();
-        AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
-        try
-        {
-            await Synchronizer.PullGitHubIssue(
-                newIssue("PullIssueWhenWorkItemDoesNotExist")
-            );
-            Assert.Equal($"", writer.ToString());
-        }
-        finally
-        {
-            AnsiConsole.Console.Profile.Out = oldWriter;
-        }
+        WorkItem workItemNullId = new WorkItem();
+
+        Assert.Null(workItemNullId.Id);
+
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Synchronizer.UpdateCommentsFromIssue(workItemNullId, newIssue("")).ToListAsync()
+        );
+    }
+
+    [Fact]
+    public async Task PullWorkItemFromIssueThrowsExceptionGivenNullIssue()
+    {
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            async () => await Synchronizer.PullWorkItemFromIssue(nullIssue)
+        );
+    }
+
+    [Fact]
+    public async Task PullWorkItemFromIssueThrowsExceptionGivenNullRepository()
+    {
+        Issue issueNullRepository = new Issue();
+
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Synchronizer.PullWorkItemFromIssue(issueNullRepository)
+        );
     }
 
     private Issue newIssue(string title = "") {

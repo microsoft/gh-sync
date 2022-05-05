@@ -1,23 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using Octokit;
-
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using System.Threading.Tasks;
 using Moq;
-
-using Xunit;
-using gh_sync;
-using System;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
-using Spectre.Console;
-using System.IO;
 
 namespace gh_sync.Tests;
 
@@ -36,7 +23,12 @@ internal static class MockServiceExtensions
 public class MockStartup
 {
     private Issue testIssue = new Issue();
-    internal const string mockUrl = "https://mock.visualstudio.com";
+    private WorkItem testWorkItem = new()
+    {
+        Url = "https://mock.visualstudio.com",
+        Id = 12345,
+        Links = new()
+    };
     private readonly Lazy<IServiceProvider> services;
     public IServiceProvider Services => services.Value;
 
@@ -63,12 +55,7 @@ public class MockStartup
                     issue.Title == "PullIssueDryRunAllowExistingWhenWorkItemExists"
                 )))
                 .Returns(
-                    Task.FromResult<WorkItem?>(new()
-                    {
-                        Url = mockUrl,
-                        Id = 12345,
-                        Links = new()
-                    })
+                    Task.FromResult<WorkItem?>(testWorkItem)
                 );
             mock
                 .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => 
@@ -83,13 +70,6 @@ public class MockStartup
         );
         services.AddMock<ISynchronizer>(mock =>
         {
-            WorkItem testWorkItem = new()
-            {
-                Url = mockUrl,
-                        Id = 12345,
-                        Links = new()
-            };
-
             mock
                 .Setup(arg => arg.PullWorkItemFromIssue(It.Is<Issue>(issue =>
                     issue.Title == "PullIssueWhenWorkItemDoesNotExist"
