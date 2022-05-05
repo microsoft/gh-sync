@@ -36,6 +36,7 @@ internal static class MockServiceExtensions
 public class MockStartup
 {
     private Issue testIssue = new Issue();
+    internal const string mockUrl = "https://mock.visualstudio.com";
     private readonly Lazy<IServiceProvider> services;
     public IServiceProvider Services => services.Value;
 
@@ -57,34 +58,53 @@ public class MockStartup
                 .Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>()))
                 .Returns(Task.FromResult(new WorkItem()));
             mock
-                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => issue.Title == "PullIssueDryRunWorksWhenWorkItemExists")))
+                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => 
+                    issue.Title == "PullIssueDryRunWorksWhenWorkItemExists" ||
+                    issue.Title == "PullIssueDryRunAllowExistingWhenWorkItemExists"
+                )))
                 .Returns(
                     Task.FromResult<WorkItem?>(new()
                     {
-                        Url = "https://mock.visualstudio.com",
+                        Url = mockUrl,
                         Id = 12345,
                         Links = new()
                     })
                 );
             mock
-                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => issue.Title == "PullIssueDryRunWorksWhenItemDoesNotExist")))
+                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => 
+                    issue.Title == "PullIssueDryRunWorksWhenItemDoesNotExist" ||
+                    issue.Title == "PullIssueWhenWorkItemDoesNotExist"
+                )))
                 .Returns(
                     Task.FromResult<WorkItem?>(null)
-                );
-            mock
-                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => issue.Title == "PullIssueDryRunAllowExisting")))
-                .Returns(
-                    Task.FromResult<WorkItem?>(new()
-                    {
-                        Url = "https://mock.visualstudio.com",
-                        Id = 12345,
-                        Links = new()
-                    })
                 );
         });
         services.AddMock<IGitHub>(
         );
-        services.AddMock<ISynchronizer>(
+        services.AddMock<ISynchronizer>(mock =>
+        {
+            WorkItem testWorkItem = new()
+            {
+                Url = mockUrl,
+                        Id = 12345,
+                        Links = new()
+            };
+
+            mock
+                .Setup(arg => arg.PullWorkItemFromIssue(It.Is<Issue>(issue =>
+                    issue.Title == "PullIssueWhenWorkItemDoesNotExist"
+                )))
+                .Returns(
+                    Task.FromResult<WorkItem>(testWorkItem)
+                );
+            mock
+                .Setup(arg => arg.UpdateState(It.IsAny<WorkItem>(), It.Is<Issue>(issue =>
+                    issue.Title == "PullIssueWhenWorkItemDoesNotExist"
+                )))
+                .Returns(
+                    Task.FromResult<WorkItem>(testWorkItem)
+                );
+        }
         );
     }
 

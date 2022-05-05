@@ -74,7 +74,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     }
 
     [Fact]
-    public async Task PullIssueDryRunAllowExisting()
+    public async Task PullIssueDryRunAllowExistingWhenWorkItemExists()
     {
         var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
@@ -82,11 +82,30 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         try
         {
             await Synchronizer.PullGitHubIssue(
-                newIssue("PullIssueDryRunAllowExisting"),
+                newIssue("PullIssueDryRunAllowExistingWhenWorkItemExists"),
                 dryRun: true,
                 allowExisting: true
             );
             Assert.Equal($"{foundItemMsg} {mockUrl}\r\n{createNewAllowExistingMsg}\r\n{notCreatingAsDryRunMsg}\r\n", writer.ToString());
+        }
+        finally
+        {
+            AnsiConsole.Console.Profile.Out = oldWriter;
+        }
+    }
+
+    [Fact]
+    public async Task PullIssueWhenWorkItemDoesNotExist()
+    {
+        var oldWriter = AnsiConsole.Console.Profile.Out;
+        var writer = new StringWriter();
+        AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
+        try
+        {
+            await Synchronizer.PullGitHubIssue(
+                newIssue("PullIssueWhenWorkItemDoesNotExist")
+            );
+            Assert.Equal($"", writer.ToString());
         }
         finally
         {

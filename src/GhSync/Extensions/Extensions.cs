@@ -212,7 +212,7 @@ namespace gh_sync
             return null;
         }
 
-        internal static string WorkItemTitle(this Issue issue) =>
+        public static string WorkItemTitle(this Issue issue) =>
             $"{issue.Title} ({issue.Repository.Owner.Login}/{issue.Repository.Name}#{issue.Number})";
 
         internal static async Task<TNewResult> Bind<TResult, TNewResult>(this Task<TResult> task, Func<TResult, Task<TNewResult>> continuation) =>
