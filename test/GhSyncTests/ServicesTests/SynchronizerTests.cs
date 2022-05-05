@@ -45,7 +45,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     }
 
     [Fact]
-    public async Task PullIssueDryRunWorksWhenWorkItemExists()
+    public async Task PullGitHubIssueDryRunWorksWhenWorkItemExists()
     {
         var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
@@ -65,7 +65,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     }
 
     [Fact]
-    public async Task PullIssueDryRunWorksWhenItemDoesNotExist()
+    public async Task PullGitHubIssueDryRunWorksWhenItemDoesNotExist()
     {
         var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
@@ -85,7 +85,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     }
 
     [Fact]
-    public async Task PullIssueDryRunAllowExistingWhenWorkItemExists()
+    public async Task PullGitHubIssueDryRunAllowExistingWhenWorkItemExists()
     {
         var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
