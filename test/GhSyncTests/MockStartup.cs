@@ -12,10 +12,8 @@ using Moq;
 using Xunit;
 using gh_sync;
 using System;
-using Octokit;
 using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using Spectre.Console;
@@ -59,7 +57,7 @@ public class MockStartup
                 .Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>()))
                 .Returns(Task.FromResult(new WorkItem()));
             mock
-                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(thing => thing.Title == "PullIssueDryRunWorksWhenWorkItemExists")))
+                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => issue.Title == "PullIssueDryRunWorksWhenWorkItemExists")))
                 .Returns(
                     Task.FromResult<WorkItem?>(new()
                     {
@@ -69,9 +67,19 @@ public class MockStartup
                     })
                 );
             mock
-                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(thing => thing.Title == "PullIssueDryRunWorksWhenItemDoesNotExist")))
+                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => issue.Title == "PullIssueDryRunWorksWhenItemDoesNotExist")))
                 .Returns(
                     Task.FromResult<WorkItem?>(null)
+                );
+            mock
+                .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => issue.Title == "PullIssueDryRunAllowExisting")))
+                .Returns(
+                    Task.FromResult<WorkItem?>(new()
+                    {
+                        Url = "https://mock.visualstudio.com",
+                        Id = 12345,
+                        Links = new()
+                    })
                 );
         });
         services.AddMock<IGitHub>(
