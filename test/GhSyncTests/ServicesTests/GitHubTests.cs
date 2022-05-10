@@ -3,6 +3,11 @@
 
 namespace gh_sync.Tests;
 
+using gh_sync;
+using System.IO;
+using Spectre.Console;
+using Octokit;
+
 public record class GitHubTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
     private Lazy<IGitHub> githubLazy = new Lazy<IGitHub>(
@@ -14,5 +19,13 @@ public record class GitHubTests(MockStartup Startup) : IClassFixture<MockStartup
     public void CanCreateGitHubFromMocks()
     {
         Assert.NotNull(GitHub);
+    }
+
+    [Fact]
+    public async Task GetClientThrowsExceptionGivenBadToken()
+    {
+        await Assert.ThrowsAsync<AuthorizationException>(
+            async () => await GitHub.GetClient()
+        );
     }
 }

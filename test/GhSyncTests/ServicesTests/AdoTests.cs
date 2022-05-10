@@ -10,7 +10,6 @@ using Octokit;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using Microsoft.Extensions.DependencyInjection;
 
 public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
