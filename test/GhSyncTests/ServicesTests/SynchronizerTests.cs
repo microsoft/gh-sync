@@ -145,31 +145,31 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
 
     private Issue newIssue(string title = "") {
         return new Issue(
-                    "",
-                    "",
-                    "",
-                    "",
-                    number: 123456,
-                    ItemState.Open,
-                    title: title,
-                    body: "",
-                    closedBy: null,
-                    user: null,
-                    labels: new List<Label>().AsReadOnly(),
-                    assignee: null,
-                    assignees: new List<User>().AsReadOnly(),
-                    milestone: null,
-                    comments: 12,
-                    pullRequest: null,
-                    closedAt: null,
-                    createdAt: DateTimeOffset.Now,
-                    updatedAt: DateTimeOffset.Now,
-                    id: 1234567,
-                    nodeId: "",
-                    locked: false,
-                    repository: new Repository(),
-                    reactions: null
-                );
+            "",
+            "",
+            "",
+            "",
+            number: 123456,
+            ItemState.Open,
+            title: title,
+            body: "",
+            closedBy: null,
+            user: null,
+            labels: new List<Label>().AsReadOnly(),
+            assignee: null,
+            assignees: new List<User>().AsReadOnly(),
+            milestone: null,
+            comments: 12,
+            pullRequest: null,
+            closedAt: null,
+            createdAt: DateTimeOffset.Now,
+            updatedAt: DateTimeOffset.Now,
+            id: 1234567,
+            nodeId: "",
+            locked: false,
+            repository: new Repository(),
+            reactions: null
+        );
     }
 
 }
