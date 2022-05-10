@@ -51,16 +51,17 @@ public class MockStartup
                 .Returns(Task.FromResult(new WorkItem()));
             mock
                 .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => 
-                    issue.Title == "PullIssueDryRunWorksWhenWorkItemExists" ||
-                    issue.Title == "PullIssueDryRunAllowExistingWhenWorkItemExists"
+                    issue.Title == "PullGitHubIssueDryRunWorksWhenWorkItemExists" ||
+                    issue.Title == "PullGitHubIssueDryRunAllowExistingWhenWorkItemExists"
                 )))
                 .Returns(
                     Task.FromResult<WorkItem?>(testWorkItem)
                 );
             mock
                 .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => 
-                    issue.Title == "PullIssueDryRunWorksWhenItemDoesNotExist" ||
-                    issue.Title == "PullIssueWhenWorkItemDoesNotExist"
+                    issue.Title == "PullGitHubIssueDryRunWorksWhenItemDoesNotExist" ||
+                    issue.Title == "PullGitHubIssueDryRunAllowExistingWhenWorkItemDoesNotExist" ||
+                    issue.Title == "PullGitHubIssueWhenWorkItemDoesNotExist"
                 )))
                 .Returns(
                     Task.FromResult<WorkItem?>(null)
@@ -72,14 +73,14 @@ public class MockStartup
         {
             mock
                 .Setup(arg => arg.PullWorkItemFromIssue(It.Is<Issue>(issue =>
-                    issue.Title == "PullIssueWhenWorkItemDoesNotExist"
+                    issue.Title == "PullGitHubIssueWhenWorkItemDoesNotExist"
                 )))
                 .Returns(
                     Task.FromResult<WorkItem>(testWorkItem)
                 );
             mock
                 .Setup(arg => arg.UpdateState(It.IsAny<WorkItem>(), It.Is<Issue>(issue =>
-                    issue.Title == "PullIssueWhenWorkItemDoesNotExist"
+                    issue.Title == "PullGitHubIssueWhenWorkItemDoesNotExist"
                 )))
                 .Returns(
                     Task.FromResult<WorkItem>(testWorkItem)

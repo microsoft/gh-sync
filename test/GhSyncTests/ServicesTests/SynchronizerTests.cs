@@ -53,7 +53,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         try
         {
             await Synchronizer.PullGitHubIssue(
-                newIssue("PullIssueDryRunWorksWhenWorkItemExists"),
+                newIssue("PullGitHubIssueDryRunWorksWhenWorkItemExists"),
                 dryRun: true
             );
             Assert.Equal($"{foundItemMsg} {mockUrl}\r\n{updateIssNoAllowExistingMsg}\r\n{noUpdateDryRunMsg}\r\n", writer.ToString());
@@ -73,7 +73,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         try
         {
             await Synchronizer.PullGitHubIssue(
-                newIssue("PullIssueDryRunWorksWhenItemDoesNotExist"),
+                newIssue("PullGitHubIssueDryRunWorksWhenItemDoesNotExist"),
                 dryRun: true
             );
             Assert.Equal($"{notCreatingAsDryRunMsg}\r\n", writer.ToString());
@@ -93,11 +93,32 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         try
         {
             await Synchronizer.PullGitHubIssue(
-                newIssue("PullIssueDryRunAllowExistingWhenWorkItemExists"),
+                newIssue("PullGitHubIssueDryRunAllowExistingWhenWorkItemExists"),
                 dryRun: true,
                 allowExisting: true
             );
             Assert.Equal($"{foundItemMsg} {mockUrl}\r\n{createNewAllowExistingMsg}\r\n{notCreatingAsDryRunMsg}\r\n", writer.ToString());
+        }
+        finally
+        {
+            AnsiConsole.Console.Profile.Out = oldWriter;
+        }
+    }
+
+    [Fact]
+    public async Task PullGitHubIssueDryRunAllowExistingWhenWorkItemDoesNotExist()
+    {
+        var oldWriter = AnsiConsole.Console.Profile.Out;
+        var writer = new StringWriter();
+        AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
+        try
+        {
+            await Synchronizer.PullGitHubIssue(
+                newIssue("PullGitHubIssueDryRunAllowExistingWhenWorkItemDoesNotExist"),
+                dryRun: true,
+                allowExisting: true
+            );
+            Assert.Equal($"{notCreatingAsDryRunMsg}\r\n", writer.ToString());
         }
         finally
         {
