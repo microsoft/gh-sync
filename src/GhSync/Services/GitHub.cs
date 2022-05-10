@@ -12,8 +12,9 @@ public record class GitHub(IOptions Options) : IGitHub
     private const string OrgName = "microsoft";
     internal const string TrackingLabel = "tracking";
 
+
     private static IGitHubClient? ghClient = null;
-    public async Task<IGitHubClient> GetClient()
+    public async Task<IGitHubClient> GetClient(string GHTokenName, IGitHubClient? ghClient)
     {
         if (ghClient != null)
         {
@@ -45,7 +46,7 @@ public record class GitHub(IOptions Options) : IGitHub
         {
             // Invalidate credential on failure.
             Extensions.Invalidate(GHTokenName);
-            AnsiConsole.MarkupLine($"Error authenticating to GitHub.");
+            AnsiConsole.MarkupLine("Error authenticating to GitHub.");
             AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
         }
 
@@ -53,7 +54,7 @@ public record class GitHub(IOptions Options) : IGitHub
     }
 
     public Task<TResult> WithClient<TResult>(Func<IGitHubClient, Task<TResult>> continuation) =>
-        GetClient().Bind(continuation);
+        GetClient(GHTokenName, ghClient).Bind(continuation);
 
     public async Task<IEnumerable<Issue>> GetGitHubIssuesFromRepo(string repo)
     {

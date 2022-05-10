@@ -7,7 +7,7 @@ namespace gh_sync;
 
 public interface IGitHub
 {
-    Task<IGitHubClient> GetClient();
+    Task<IGitHubClient> GetClient(string GHTokenName, IGitHubClient? ghClient);
 
     Task<TResult> WithClient<TResult>(Func<IGitHubClient, Task<TResult>> continuation);
 

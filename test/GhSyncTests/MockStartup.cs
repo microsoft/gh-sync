@@ -29,6 +29,7 @@ public class MockStartup
         Id = 12345,
         Links = new()
     };
+    private string? nullStr = null;
     private readonly Lazy<IServiceProvider> services;
     public IServiceProvider Services => services.Value;
 
@@ -44,9 +45,19 @@ public class MockStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddMock<IOptions>(
-            
-        );
+        services.AddMock<IOptions>(mock =>
+        {
+            mock
+                .Setup(arg => arg.GetVariable(It.Is<string>(varName =>
+                    varName == "bad-token"
+                )))
+                .Returns("");
+            mock
+                .Setup(arg => arg.GetVariable(It.Is<string>(varName =>
+                    varName == "unauthorized-token"
+                )))
+                .Returns("some-token-value");
+        });
         services.AddMock<IAdo>(mock =>
         {
             mock
