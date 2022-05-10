@@ -24,7 +24,7 @@ public record class GitHubTests(MockStartup Startup) : IClassFixture<MockStartup
     [Fact]
     public async Task GetClientThrowsExceptionGivenBadToken()
     {
-        await Assert.ThrowsAsync<AuthorizationException>(
+        await Assert.ThrowsAsync<ArgumentNullException>(
             async () => await GitHub.GetClient()
         );
     }

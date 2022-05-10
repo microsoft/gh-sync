@@ -5,7 +5,7 @@ using Octokit;
 
 namespace gh_sync;
 
-public class GitHub : IGitHub
+public record class GitHub(IOptions Options) : IGitHub
 {
     private const string GHTokenName = "gh-token";
     private const string ProductName = "ms-quantum-gh-sync";
@@ -20,11 +20,7 @@ public class GitHub : IGitHub
             return ghClient;
         }
 
-        var GHToken = Extensions.RetreiveOrPrompt(
-            GHTokenName,
-            prompt: "Please provide a PAT for use with GitHub: ",
-            envVarName: "GITHUB_TOKEN"
-        );
+        var GHToken = Options.GetVariable(GHTokenName);
 
         var tokenAuth = new Credentials(GHToken);
         try

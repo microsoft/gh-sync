@@ -44,6 +44,9 @@ public class MockStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddMock<IOptions>(
+            
+        );
         services.AddMock<IAdo>(mock =>
         {
             mock
@@ -68,6 +71,7 @@ public class MockStartup
                 );
         });
         services.AddMock<IGitHub>(
+
         );
         services.AddMock<ISynchronizer>(mock =>
         {
