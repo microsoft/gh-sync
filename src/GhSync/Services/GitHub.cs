@@ -31,7 +31,7 @@ public record class GitHub(IOptions Options) : IGitHub
                 Credentials = tokenAuth
             };
 
-            var orgProfile = await GetOrgProfile(ghClient, OrgName);
+            var orgProfile = await Options.GetOrgProfile(ghClient, OrgName);
             if (orgProfile is Organization profile)
             {
                 AnsiConsole.MarkupLine("[green]Got profile OK![/]");
@@ -51,11 +51,6 @@ public record class GitHub(IOptions Options) : IGitHub
         }
 
         throw new AuthorizationException();
-    }
-
-    public async Task<Organization> GetOrgProfile(IGitHubClient ghClient, string OrgName)
-    {
-        return await ghClient.Organization.Get(OrgName);
     }
 
     public Task<TResult> WithClient<TResult>(Func<IGitHubClient, Task<TResult>> continuation) =>

@@ -3,6 +3,8 @@
 
 namespace gh_sync;
 
+using Octokit;
+
 public class Options : IOptions
 {
     private const string GHTokenName = "gh-token";
@@ -46,5 +48,10 @@ public class Options : IOptions
         }
 
         return variable;
+    }
+
+    public async Task<Organization?> GetOrgProfile(IGitHubClient ghClient, string OrgName)
+    {
+        return await ghClient.Organization.Get(OrgName);
     }
 }

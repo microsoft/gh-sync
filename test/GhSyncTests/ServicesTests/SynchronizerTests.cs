@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using Spectre.Console;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
@@ -47,6 +48,8 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     [Fact]
     public async Task PullGitHubIssueDryRunWorksWhenWorkItemExists()
     {
+        // AnsiConsole can sometimes pick up output from previous tests
+        Thread.Sleep(100);
         var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
         AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);

@@ -47,6 +47,7 @@ public class MockStartup
     {
         services.AddMock<IOptions>(mock =>
         {
+            // GetToken()
             mock
                 .Setup(arg => arg.GetToken(It.Is<string>(varName =>
                     varName == "bad-token"
@@ -56,13 +57,39 @@ public class MockStartup
                 .Setup(arg => arg.GetToken(It.Is<string>(varName =>
                     varName == "unauthorized-token"
                 )))
-                .Returns("some-token-value");
+                .Returns("unauthorized-token-value");
+            mock
+                .Setup(arg => arg.GetToken(It.Is<string>(varName =>
+                    varName == "valid-token"
+                )))
+                .Returns("valid-token-value");
+
+            // GetOrgProfile()
+            mock
+                .Setup(arg => arg.GetOrgProfile(
+                    It.Is<GitHubClient>(ghClient =>
+                        ghClient.Credentials.Password == "invalid-token-value"
+                    ), 
+                    It.IsAny<string>()
+                ))
+                .Returns(Task.FromResult<Organization?>(null));
+            mock
+                .Setup(arg => arg.GetOrgProfile(
+                    It.Is<GitHubClient>(ghClient =>
+                        ghClient.Credentials.Password == "valid-token-value"
+                    ), 
+                    It.IsAny<string>()
+                ))
+                .Returns(Task.FromResult<Organization?>(new Organization()));
         });
         services.AddMock<IAdo>(mock =>
         {
+            // UpdateFromIssue()
             mock
                 .Setup(arg => arg.UpdateFromIssue(It.IsAny<WorkItem>(), It.IsAny<Issue?>()))
                 .Returns(Task.FromResult(new WorkItem()));
+
+            // GetAdoWorkItem()
             mock
                 .Setup(arg => arg.GetAdoWorkItem(It.Is<Issue>(issue => 
                     issue.Title == "PullGitHubIssueDryRunWorksWhenWorkItemExists" ||
@@ -86,6 +113,7 @@ public class MockStartup
         );
         services.AddMock<ISynchronizer>(mock =>
         {
+            // PullWorkItemFromIssue()
             mock
                 .Setup(arg => arg.PullWorkItemFromIssue(It.Is<Issue>(issue =>
                     issue.Title == "PullGitHubIssueWhenWorkItemDoesNotExist"
@@ -93,6 +121,8 @@ public class MockStartup
                 .Returns(
                     Task.FromResult<WorkItem>(testWorkItem)
                 );
+
+            // UpdateState()
             mock
                 .Setup(arg => arg.UpdateState(It.IsAny<WorkItem>(), It.Is<Issue>(issue =>
                     issue.Title == "PullGitHubIssueWhenWorkItemDoesNotExist"
