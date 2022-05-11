@@ -3,7 +3,6 @@
 
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
 using Octokit;
@@ -17,18 +16,16 @@ public record class Ado(IOptions options) : IAdo
     internal const string AdoProjectName = "ado-project";
 
     private static VssConnection? adoConnection = null;
-    public async Task<VssConnection> GetAdoConnection()
+    public async Task<VssConnection> GetAdoConnection(string ADOTokenName, VssConnection? adoConnection)
     {
         if (adoConnection != null)
         {
             return adoConnection;
         }
 
-        var collectionUri = options.GetToken(ADOUriName);
         var adoToken = options.GetToken(ADOTokenName);
 
-        var creds = new VssBasicCredential(string.Empty, adoToken);
-        var connection = new VssConnection(new Uri(Options._CollectionUri), creds);
+        var connection = options.GetVssConnection(adoToken);
 
         try
         {
@@ -48,7 +45,7 @@ public record class Ado(IOptions options) : IAdo
     }
 
     public Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation) =>
-        GetAdoConnection().Bind(connection => connection.GetClient<WorkItemTrackingHttpClient>()).Bind(continuation);
+        GetAdoConnection(ADOTokenName, adoConnection).Bind(connection => connection.GetClient<WorkItemTrackingHttpClient>()).Bind(continuation);
 
 
     public async IAsyncEnumerable<Comment> EnumerateComments(WorkItem workItem)

@@ -20,6 +20,16 @@ public record class GitHubTests(MockStartup Startup) : IClassFixture<MockStartup
     }
 
     [Fact]
+    public void GetClientReturnsClientIfNotNull()
+    {
+        IGitHubClient? ghClient = new GitHubClient(new ProductHeaderValue("some-product-name")){
+            Credentials = new Credentials("some-credentials")
+        };
+
+        Assert.NotNull(GitHub.GetClient("some-token", ghClient));
+    }
+
+    [Fact]
     public async Task GetClientThrowsExceptionsGivenBadToken()
     {
         IGitHubClient? nullClient = null;
@@ -37,16 +47,6 @@ public record class GitHubTests(MockStartup Startup) : IClassFixture<MockStartup
         await Assert.ThrowsAsync<AuthorizationException>(
             async () => await GitHub.GetClient("unauthorized-token", nullClient)
         );
-    }
-
-    [Fact]
-    public void GetClientReturnsClientIfNotNull()
-    {
-        IGitHubClient? ghClient = new GitHubClient(new ProductHeaderValue("some-product-name")){
-            Credentials = new Credentials("some-credentials")
-        };
-
-        Assert.NotNull(GitHub.GetClient("some-token", ghClient));
     }
 
     [Fact]

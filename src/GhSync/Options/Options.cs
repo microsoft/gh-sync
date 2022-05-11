@@ -4,6 +4,8 @@
 namespace gh_sync;
 
 using Octokit;
+using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.WebApi;
 
 public class Options : IOptions
 {
@@ -53,5 +55,13 @@ public class Options : IOptions
     public async Task<Organization?> GetOrgProfile(IGitHubClient ghClient, string OrgName)
     {
         return await ghClient.Organization.Get(OrgName);
+    }
+
+    public VssConnection GetVssConnection(string adoToken)
+    {
+        var creds = new VssBasicCredential(string.Empty, adoToken);
+        var connection = new VssConnection(new Uri(Options._CollectionUri), creds);
+
+        return connection;
     }
 }

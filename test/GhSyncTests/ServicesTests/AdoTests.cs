@@ -10,6 +10,8 @@ using Octokit;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services.WebApi;
+using Microsoft.VisualStudio.Services.Common;
 
 public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
@@ -22,6 +24,36 @@ public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
     public void CanCreateAdoFromMocks()
     {
         Assert.NotNull(Ado);
+    }
+
+    [Fact]
+    public async Task GetAdoConnectionReturnsConnectionIfNotNull()
+    {
+        var testUri = new Uri("http://some-uri");
+        var testCreds = new VssBasicCredential("", "some-token");
+        VssConnection? testConnection = new VssConnection(testUri, testCreds);
+
+        Assert.NotNull(await Ado.GetAdoConnection("bad-token", testConnection));
+    }
+
+    [Fact]
+    public async Task GetAdoConnectionThrowsExceptionGivenBadToken()
+    {
+        VssConnection? nullConnection = null;
+
+        await Assert.ThrowsAsync<NullReferenceException>(
+            async () => await Ado.GetAdoConnection("bad-token", nullConnection)
+        );
+    }
+
+    [Fact]
+    public async Task GetAdoConnectionThrowsExceptionGivenUnauthorizedToken()
+    {
+        VssConnection? nullConnection = null;
+
+        await Assert.ThrowsAsync<AuthorizationException>(
+            async () => await Ado.GetAdoConnection("unauthorized-token", nullConnection)
+        );
     }
 
     [Fact]

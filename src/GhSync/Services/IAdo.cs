@@ -10,7 +10,7 @@ namespace gh_sync;
 
 public interface IAdo
 {
-
+    Task<VssConnection> GetAdoConnection(string ADOTokenName, VssConnection? adoConnection);
     Task<TResult> WithWorkItemClient<TResult>(Func<WorkItemTrackingHttpClient, Task<TResult>> continuation);
 
     IAsyncEnumerable<Comment> EnumerateComments(WorkItem workItem);
