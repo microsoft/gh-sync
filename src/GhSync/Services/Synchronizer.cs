@@ -64,7 +64,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
                             Value = state.State
                         }
                     },
-                    gh_sync.Ado._ProjectName, workItem.Id!.Value
+                    Options._ProjectName, workItem.Id!.Value
                 );
             });
             // TODO: update Reason
@@ -101,7 +101,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
                         {
                             Text = commentText
                         },
-                        gh_sync.Ado._ProjectName,
+                        Options._ProjectName,
                         workItem.Id.Value
                     )
                 );
@@ -120,7 +120,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
             {
                 var result = await client.CreateWorkItemAsync(
                     patch,
-                    gh_sync.Ado._ProjectName,
+                    Options._ProjectName,
                     issue.WorkItemType()
                 );
                 return result;
@@ -138,7 +138,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
                 {
                     Text = $"Work item created from public GitHub issue at {issue.Url}, using the gh-sync tool."
                 },
-                gh_sync.Ado._ProjectName,
+                Options._ProjectName,
                 newItem.Id.Value
             )
         );

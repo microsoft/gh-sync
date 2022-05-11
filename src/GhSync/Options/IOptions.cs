@@ -5,5 +5,5 @@ namespace gh_sync;
 
 public interface IOptions
 {
-    string GetVariable(string varName);
+    string GetToken(string varName);
 }

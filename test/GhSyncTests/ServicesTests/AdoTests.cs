@@ -13,7 +13,16 @@ using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 public record class AdoTests(MockStartup Startup) : IClassFixture<MockStartup>
 {
-    Ado Ado = new Ado();
+    private Lazy<IAdo> adoLazy = new Lazy<IAdo>(
+        () => ActivatorUtilities.CreateInstance<Ado>(Startup.Services)
+    );
+    private IAdo Ado => adoLazy.Value;
+
+    [Fact]
+    public void CanCreateAdoFromMocks()
+    {
+        Assert.NotNull(Ado);
+    }
 
     [Fact]
     // <summary>

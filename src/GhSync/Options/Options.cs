@@ -7,7 +7,21 @@ public class Options : IOptions
 {
     private const string GHTokenName = "gh-token";
     private const string ADOTokenName = "ado-token";
-    public string GetVariable(string varName)
+    internal const string ADOUriName = "ado-uri";
+    internal const string AdoProjectName = "ado-project";
+
+    internal static readonly string _CollectionUri = Extensions.RetreiveOrPrompt(
+        ADOUriName,
+        prompt: "Please provide a URI for your ADO project organization: ",
+        envVarName: "ADO_URL"
+    );
+    internal static readonly string _ProjectName = Extensions.RetreiveOrPrompt(
+        AdoProjectName,
+        prompt: "Please provide a name for your ADO project: ",
+        envVarName: "ADO_PROJECT"
+    );
+
+    public string GetToken(string varName)
     {
         string variable = "";
 
@@ -18,6 +32,13 @@ public class Options : IOptions
                     GHTokenName,
                     prompt: "Please provide a PAT for use with GitHub: ",
                     envVarName: "GITHUB_TOKEN"
+                );
+                break;
+            case ADOTokenName:
+                variable = Extensions.RetreiveOrPrompt(
+                    ADOTokenName,
+                    prompt: "Please provide a PAT for use with Azure DevOps: ",
+                    envVarName: "ADO_TOKEN"
                 );
                 break;
             default:

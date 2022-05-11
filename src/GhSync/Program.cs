@@ -82,7 +82,7 @@ class Program
         {
             var ado = services.GetRequiredService<IAdo>();
             var workItem = await ado.WithWorkItemClient(async client =>
-                await client.GetWorkItemAsync(Ado._ProjectName, id, expand: WorkItemExpand.Relations)
+                await client.GetWorkItemAsync(Options._ProjectName, id, expand: WorkItemExpand.Relations)
             );
             workItem.WriteToConsole();
         }, id);

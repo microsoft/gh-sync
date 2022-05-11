@@ -48,12 +48,12 @@ public class MockStartup
         services.AddMock<IOptions>(mock =>
         {
             mock
-                .Setup(arg => arg.GetVariable(It.Is<string>(varName =>
+                .Setup(arg => arg.GetToken(It.Is<string>(varName =>
                     varName == "bad-token"
                 )))
                 .Returns("");
             mock
-                .Setup(arg => arg.GetVariable(It.Is<string>(varName =>
+                .Setup(arg => arg.GetToken(It.Is<string>(varName =>
                     varName == "unauthorized-token"
                 )))
                 .Returns("some-token-value");

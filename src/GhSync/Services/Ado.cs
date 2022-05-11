@@ -10,22 +10,11 @@ using Octokit;
 
 namespace gh_sync;
 
-public record class Ado() : IAdo
+public record class Ado(IOptions options) : IAdo
 {
     internal const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
     internal const string AdoProjectName = "ado-project";
-
-    internal static readonly string _CollectionUri = Extensions.RetreiveOrPrompt(
-        ADOUriName,
-        prompt: "Please provide a URI for your ADO project organization: ",
-        envVarName: "ADO_URL"
-    );
-    internal static readonly string _ProjectName = Extensions.RetreiveOrPrompt(
-        AdoProjectName,
-        prompt: "Please provide a name for your ADO project: ",
-        envVarName: "ADO_PROJECT"
-    );
 
     private static VssConnection? adoConnection = null;
     public async Task<VssConnection> GetAdoConnection()
@@ -35,14 +24,11 @@ public record class Ado() : IAdo
             return adoConnection;
         }
 
-        var _ADOToken = Extensions.RetreiveOrPrompt(
-            ADOTokenName,
-            prompt: "Please provide a PAT for use with Azure DevOps: ",
-            envVarName: "ADO_TOKEN"
-        );
+        var collectionUri = options.GetToken(ADOUriName);
+        var adoToken = options.GetToken(ADOTokenName);
 
-        var creds = new VssBasicCredential(string.Empty, _ADOToken);
-        var connection = new VssConnection(new Uri(_CollectionUri), creds);
+        var creds = new VssBasicCredential(string.Empty, adoToken);
+        var connection = new VssConnection(new Uri(Options._CollectionUri), creds);
 
         try
         {
@@ -73,11 +59,13 @@ public record class Ado() : IAdo
         }
 
         string? continuationToken = null;
+        var projectName = options.GetToken(AdoProjectName);
+
         do
         {
             var batch = await WithWorkItemClient(async client =>
                 await client.GetCommentsAsync(
-                    _ProjectName,
+                    Options._ProjectName,
                     workItem.Id.Value,
                     continuationToken: continuationToken
                 )
