@@ -195,5 +195,4 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
             reactions: null
         );
     }
-
 }
