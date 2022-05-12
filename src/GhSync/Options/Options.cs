@@ -13,6 +13,7 @@ public class Options : IOptions
     private const string ADOTokenName = "ado-token";
     internal const string ADOUriName = "ado-uri";
     internal const string AdoProjectName = "ado-project";
+    internal const string AreaPathName = "area-path";
 
     internal static readonly string _CollectionUri = Extensions.RetreiveOrPrompt(
         ADOUriName,
@@ -23,6 +24,11 @@ public class Options : IOptions
         AdoProjectName,
         prompt: "Please provide a name for your ADO project: ",
         envVarName: "ADO_PROJECT"
+    );
+    internal static readonly string _AreaPath = Extensions.RetreiveOrPrompt(
+        AreaPathName,
+        prompt: "Please provide an area path for your ADO project organization: ",
+        envVarName: "ADO_AREA_PATH"
     );
 
     public string GetToken(string varName)
