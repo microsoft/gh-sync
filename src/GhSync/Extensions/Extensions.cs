@@ -186,7 +186,7 @@ namespace gh_sync
             return patch;
         }
 
-        internal static (string State, string Reason)? WorkItemState(this Issue issue)
+        public static (string State, string Reason)? WorkItemState(this Issue issue)
         {
             if (issue.State.Value == ItemState.Open)
             {

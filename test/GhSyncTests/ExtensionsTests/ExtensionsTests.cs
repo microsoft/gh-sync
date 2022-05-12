@@ -11,7 +11,7 @@ using System.Collections.Generic;
 public record class ExtensionsTests
 {
     [Fact]
-    public void WorkItemTypeReturnsCorrectTypes()
+    public void WorkItemTypeReturnsCorrectly()
     {
         var bugIssue = newIssue("bug");
         var kindBugIssue = newIssue("Kind-Bug");
@@ -30,14 +30,36 @@ public record class ExtensionsTests
         Assert.Equal("Bug", Extensions.WorkItemType(testIssue));
     }
 
-    private Issue newIssue(string title = "") {
+    [Fact]
+    public void WorkItemStateReturnsCorrectly()
+    {
+        var openIssue = newIssue(state: ItemState.Open);
+        Assert.Equal(("New", "Approved"), openIssue.WorkItemState());
+
+        var doneIssue = newIssue(title: "Resolution-Done", state: ItemState.Closed);
+        Assert.Equal(("Closed", "Fixed and verified"), doneIssue.WorkItemState());
+
+        var invalidIssue = newIssue(title: "Resolution-Invalid", state: ItemState.Closed);
+        Assert.Equal(("Resolved", "Cannot Reproduce"), invalidIssue.WorkItemState());
+
+        var duplicateIssue = newIssue(title: "Resolution-Duplicate", state: ItemState.Closed);
+        Assert.Equal(("Resolved", "Duplicate"), duplicateIssue.WorkItemState());
+
+        var wontFixIssue = newIssue(title: "Resolution-WontFix", state: ItemState.Closed);
+        Assert.Equal(("Resolved", "As Designed"), wontFixIssue.WorkItemState());
+
+        var badIssue = newIssue(state: ItemState.Closed);
+        Assert.Equal(null, badIssue.WorkItemState());
+    }
+
+    private Issue newIssue(string title = "", ItemState state = ItemState.Open) {
         return new Issue(
             "",
             "",
             "",
             "",
             number: 123456,
-            ItemState.Open,
+            state: state,
             title: title,
             body: "",
             closedBy: null,

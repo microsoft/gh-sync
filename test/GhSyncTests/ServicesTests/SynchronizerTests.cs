@@ -49,7 +49,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     public async Task PullGitHubIssueDryRunWorksWhenWorkItemExists()
     {
         // AnsiConsole can sometimes pick up output from previous tests
-        Thread.Sleep(100);
+        Thread.Sleep(300);
         var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
         AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
