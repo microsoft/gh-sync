@@ -48,9 +48,6 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     [Fact]
     public async Task PullGitHubIssueDryRunWorksWhenWorkItemExists()
     {
-        // AnsiConsole can sometimes pick up output from previous tests
-        Thread.Sleep(300);
-        var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
         AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
         try
@@ -63,14 +60,13 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         }
         finally
         {
-            AnsiConsole.Console.Profile.Out = oldWriter;
+            AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(new StringWriter());
         }
     }
 
     [Fact]
     public async Task PullGitHubIssueDryRunWorksWhenItemDoesNotExist()
     {
-        var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
         AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
         try
@@ -83,14 +79,13 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         }
         finally
         {
-            AnsiConsole.Console.Profile.Out = oldWriter;
+            AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(new StringWriter());
         }
     }
 
     [Fact]
     public async Task PullGitHubIssueDryRunAllowExistingWhenWorkItemExists()
     {
-        var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
         AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
         try
@@ -104,14 +99,13 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         }
         finally
         {
-            AnsiConsole.Console.Profile.Out = oldWriter;
+            AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(new StringWriter());
         }
     }
 
     [Fact]
     public async Task PullGitHubIssueDryRunAllowExistingWhenWorkItemDoesNotExist()
     {
-        var oldWriter = AnsiConsole.Console.Profile.Out;
         var writer = new StringWriter();
         AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
         try
@@ -125,7 +119,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
         }
         finally
         {
-            AnsiConsole.Console.Profile.Out = oldWriter;
+            AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(new StringWriter());
         }
     }
 
