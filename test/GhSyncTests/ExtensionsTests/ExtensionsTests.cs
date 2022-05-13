@@ -52,8 +52,8 @@ public record class ExtensionsTests
         Assert.Equal(null, badIssue.WorkItemState());
     }
 
-    private Issue newIssue(string title = "", ItemState state = ItemState.Open) {
-        return new Issue(
+    private Issue newIssue(string title = "", ItemState state = ItemState.Open) =>
+        new Issue(
             "",
             "",
             "",
@@ -79,11 +79,9 @@ public record class ExtensionsTests
             repository: new Repository(),
             reactions: null
         );
-    }
 
-    private Label newLabel(string name = "")
-    {
-        return new Label(
+    private Label newLabel(string name = "") =>
+        new Label(
             id: 1,
             url: "",
             name: name,
@@ -92,5 +90,4 @@ public record class ExtensionsTests
             description: "",
             true
         );
-    }
 }

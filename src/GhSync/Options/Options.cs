@@ -31,37 +31,23 @@ public class Options : IOptions
         envVarName: "ADO_AREA_PATH"
     );
 
-    public string GetToken(string varName)
+    public string? GetToken(string varName) => varName switch
     {
-        string variable = "";
+        GHTokenName => Extensions.RetreiveOrPrompt(
+            GHTokenName,
+            prompt: "Please provide a PAT for use with GitHub: ",
+            envVarName: "GITHUB_TOKEN"
+        ),
+        ADOTokenName => Extensions.RetreiveOrPrompt(
+            ADOTokenName,
+            prompt: "Please provide a PAT for use with Azure DevOps: ",
+            envVarName: "ADO_TOKEN"
+        ),
+        _ => null
+    };
 
-        switch (varName)
-        {
-            case GHTokenName:
-                variable = Extensions.RetreiveOrPrompt(
-                    GHTokenName,
-                    prompt: "Please provide a PAT for use with GitHub: ",
-                    envVarName: "GITHUB_TOKEN"
-                );
-                break;
-            case ADOTokenName:
-                variable = Extensions.RetreiveOrPrompt(
-                    ADOTokenName,
-                    prompt: "Please provide a PAT for use with Azure DevOps: ",
-                    envVarName: "ADO_TOKEN"
-                );
-                break;
-            default:
-                break;
-        }
-
-        return variable;
-    }
-
-    public async Task<Organization?> GetOrgProfile(IGitHubClient ghClient, string OrgName)
-    {
-        return await ghClient.Organization.Get(OrgName);
-    }
+    public async Task<Organization?> GetOrgProfile(IGitHubClient ghClient, string OrgName) =>
+        await ghClient.Organization.Get(OrgName);
 
     public VssConnection GetVssConnection(string adoToken)
     {
