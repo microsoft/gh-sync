@@ -6,7 +6,7 @@ using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
 using Octokit;
 
-namespace gh_sync;
+namespace Microsoft.GhSync;
 
 public interface IAdo
 {

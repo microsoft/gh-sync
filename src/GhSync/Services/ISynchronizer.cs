@@ -4,7 +4,7 @@
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Octokit;
 
-namespace gh_sync;
+namespace Microsoft.GhSync;
 
 /// <summary>
 ///     Service for synchronizing from GitHub to ADO.

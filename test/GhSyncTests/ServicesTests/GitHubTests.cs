@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace gh_sync.Tests;
+namespace Microsoft.GhSync.Tests;
 
-using gh_sync;
 using Octokit;
 
 public record class GitHubTests(MockStartup Startup) : IClassFixture<MockStartup>

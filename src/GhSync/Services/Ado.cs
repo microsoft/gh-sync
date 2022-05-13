@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
 using Octokit;
 
-namespace gh_sync;
+namespace Microsoft.GhSync;
 
 public record class Ado(IOptions options) : IAdo
 {

@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+namespace Microsoft.GhSync.Tests;
+
 using Octokit;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using Microsoft.VisualStudio.Services.Common;
-using Microsoft.VisualStudio.Services.WebApi;
 using Moq;
 using System.Collections.Generic;
-
-namespace gh_sync.Tests;
 
 internal static class MockServiceExtensions
 {

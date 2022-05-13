@@ -4,7 +4,7 @@
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Octokit;
 
-namespace gh_sync;
+namespace Microsoft.GhSync;
 
 public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
 {

@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace gh_sync.Tests;
+namespace Microsoft.GhSync.Tests;
 
 using Xunit;
-using gh_sync;
 using System;
 using Octokit;
 using System.Threading.Tasks;
@@ -48,6 +47,7 @@ public record class SynchronizerTests(MockStartup Startup) : IClassFixture<MockS
     [Fact]
     public async Task PullGitHubIssueDryRunWorksWhenWorkItemExists()
     {
+        Thread.Sleep(300);
         var writer = new StringWriter();
         AnsiConsole.Console.Profile.Out = new AnsiConsoleOutput(writer);
         try

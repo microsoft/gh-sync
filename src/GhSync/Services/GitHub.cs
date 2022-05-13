@@ -3,7 +3,7 @@
 
 using Octokit;
 
-namespace gh_sync;
+namespace Microsoft.GhSync;
 
 public record class GitHub(IOptions Options) : IGitHub
 {

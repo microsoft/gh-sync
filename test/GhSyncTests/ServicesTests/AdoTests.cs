@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace gh_sync.Tests;
+namespace Microsoft.GhSync.Tests;
 
 using Xunit;
-using gh_sync;
 using System;
 using Octokit;
 using System.Threading.Tasks;

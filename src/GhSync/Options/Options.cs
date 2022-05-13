@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace gh_sync;
+namespace Microsoft.GhSync;
 
 using Octokit;
 using Microsoft.VisualStudio.Services.Common;

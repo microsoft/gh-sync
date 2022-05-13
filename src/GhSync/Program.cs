@@ -6,7 +6,7 @@ using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 
-namespace gh_sync;
+namespace Microsoft.GhSync;
 
 class Program
 {
