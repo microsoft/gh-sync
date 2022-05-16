@@ -8,6 +8,12 @@ using System.CommandLine.Parsing;
 
 namespace Microsoft.GhSync;
 
+/// <summary>
+    /// The gh-sync program.
+    /// This program synchronizes public GitHub issues with internal ADO work items
+    /// using Octokit and the ADO API. The tool can be used from the command line or
+    /// added to public GitHub repositories via a GitHub Action.
+/// </summary>
 class Program
 {
     protected readonly IServiceProvider services;
@@ -29,6 +35,13 @@ class Program
     static async Task<int> Main(string[] args) =>
         await new Program().Invoke(args);
 
+    /// <summary>
+        /// Pull a single GitHub Issue into ADO tracking.
+    /// </summary>
+    /// <param name="repo">The name of the GitHub repository, e.g. microsoft/iqsharp.</param>
+    /// <param name="issue">The id of the GitHub issue to pull.</param>
+    /// <param name="dryRun">A boolean argument on if a GitHub issue should be pulled into ADO or not. If true then no work item will be created or updated.</param>
+    /// <param name="allowExisting">A boolean argument to determine if a new ADO work item should be created regardless if an item already exists.</param>
     private Command PullIssueCommand(Argument<string> repo, Argument<int> issue, Option<bool> dryRun, Option<bool> allowExisting)
     {
         var command = new Command("pull-gh", "Pull from GitHub into ADO")
@@ -51,6 +64,12 @@ class Program
         return command;
     }
 
+    /// <summary>
+        /// Pull all GitHub issues from a given repository that have the "tracking" label.
+    /// </summary>
+    /// <param name="repo">The name of the GitHub repository, e.g. microsoft/iqsharp.</param>
+    /// <param name="dryRun">A boolean argument on if a GitHub issue should be pulled into ADO or not. If true then no work item will be created or updated.</param>
+    /// <param name="allowExisting">A boolean argument to determine if a new ADO work item should be created regardless if an item already exists.</param>
     internal record PullAllIssueOptions(bool DryRun, bool AllowExisting);
     private Command PullAllIssuesCommand(Argument<string> repo, Option<bool> dryRun, Option<bool> allowExisting)
     {
@@ -71,6 +90,10 @@ class Program
 
     }
 
+    /// <summary>
+        /// Show a text representation of an ADO issue.
+    /// </summary>
+    /// <param name="id">The id of the ADO issue to retrieve.</param>
     private Command GetAdoWorkItemCommand(Argument<int> id)
     {
         var command = new Command("get-ado")
@@ -91,6 +114,11 @@ class Program
 
     }
 
+    /// <summary>
+        /// Retrieve the URL link of the ADO work item (if it exists) that corresponds to the given GitHub issue.
+    /// </summary>
+    /// <param name="repo">The name of the GitHub repository, e.g. microsoft/iqsharp.</param>
+    /// <param name="issue">The id of the GitHub issue to pull.</param>
     private Command FindAdoWorkItemCommand(Argument<string> repo, Argument<int> issue)
     {
         var command = new Command("find-ado")

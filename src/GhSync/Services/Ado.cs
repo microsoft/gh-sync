@@ -76,7 +76,6 @@ public record class Ado(IOptions options) : IAdo
         while (continuationToken != null);
     }
 
-
     public async Task<WorkItem> UpdateFromIssue(WorkItem workItem, Issue? issue)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
