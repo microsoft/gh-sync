@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 if (-not ($IsWindows -or $PSVersionTable.PSEdition -eq "Desktop")) {
     Write-Error "gh-sync is currently only supported on Windows";
 }
