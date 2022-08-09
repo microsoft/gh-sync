@@ -33,6 +33,7 @@ if ($ghSync) {
     # Finally, copy into new path.
     $target = $ghBin;
 }
-
+Push-Location (Join-Path $PSScriptRoot "src/GhSync");
 dotnet publish --self-contained --runtime win10-x64 /p:PublishSingleFile=true
-Copy-Item bin/Debug/net6.0-windows10.0.19041.0/win10-x64/publish/gh-sync.exe $target
+Copy-Item bin/Debug/net6.0-windows/win10-x64/publish/gh-sync.exe $target
+Pop-Location;
