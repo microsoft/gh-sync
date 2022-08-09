@@ -8,7 +8,7 @@ namespace Microsoft.GhSync;
 
 public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
 {
-    public async Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false)
+    public async Task PullGitHubIssue(Issue ghIssue, bool dryRun = false, bool allowExisting = false, string? workItemType = null)
     {
         // Check if there's already a work item.
         var workItem = await Ado.GetAdoWorkItem(ghIssue);
@@ -38,7 +38,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
 
         if (!dryRun)
         {
-            var newWorkItem = await PullWorkItemFromIssue(ghIssue);
+            var newWorkItem = await PullWorkItemFromIssue(ghIssue, workItemType);
             await UpdateState(newWorkItem, ghIssue);
             AnsiConsole.MarkupLine($@"Created new work item: {newWorkItem.ReadableLink()}");
         }
@@ -109,7 +109,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
         }
     }
 
-    public async Task<WorkItem> PullWorkItemFromIssue(Issue? issue)
+    public async Task<WorkItem> PullWorkItemFromIssue(Issue? issue, string? workItemType = null)
     {
         if (issue == null) throw new ArgumentNullException(nameof(issue));
         if (issue.Repository == null) throw new NullReferenceException($"Issue {issue.Title} did not have an associated repository.");
@@ -121,7 +121,7 @@ public record class Synchronizer(IAdo Ado, IGitHub GitHub) : ISynchronizer
                 var result = await client.CreateWorkItemAsync(
                     patch,
                     Options._ProjectName,
-                    issue.WorkItemType()
+                    workItemType ?? issue.WorkItemType()
                 );
                 return result;
             }

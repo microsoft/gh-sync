@@ -130,14 +130,14 @@ public static class Extensions
     {
         if (issue.IsLabeledAs("bug", "Kind-Bug"))
         {
-            return "Bug";
+            return "Task";
         }
         else if (issue.IsLabeledAs("enhancement", "Kind-Enhancement"))
         {
             return "Task";
         }
         // Default to "bug" if we don't know anything more specific.
-        return "Bug";
+        return "Task";
     }
 
     internal static string MarkdownToHtml(this string source)
