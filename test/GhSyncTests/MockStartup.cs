@@ -6,8 +6,9 @@ namespace Microsoft.GhSync.Tests;
 using Octokit;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Moq;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Collections.Generic;
+
 
 internal static class MockServiceExtensions
 {
