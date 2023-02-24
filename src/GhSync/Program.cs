@@ -36,30 +36,31 @@ class Program
         await new Program().Invoke(args);
 
     /// <summary>
-        /// Pull a single GitHub Issue into ADO tracking.
+    ///     Pull a single GitHub Issue into ADO tracking.
     /// </summary>
     /// <param name="repo">The name of the GitHub repository, e.g. microsoft/iqsharp.</param>
     /// <param name="issue">The id of the GitHub issue to pull.</param>
     /// <param name="dryRun">A boolean argument on if a GitHub issue should be pulled into ADO or not. If true then no work item will be created or updated.</param>
     /// <param name="allowExisting">A boolean argument to determine if a new ADO work item should be created regardless if an item already exists.</param>
-    private Command PullIssueCommand(Argument<string> repo, Argument<int> issue, Option<bool> dryRun, Option<bool> allowExisting)
+    private Command PullIssueCommand(Argument<string> repo, Argument<int> issue, Option<bool> dryRun, Option<bool> allowExisting, Option<string?> workItemType)
     {
         var command = new Command("pull-gh", "Pull from GitHub into ADO")
         {
             repo,
             issue,
             dryRun,
-            allowExisting
+            allowExisting,
+            workItemType
         };
 
-        command.SetHandler(async (string repo, int issueId, bool dryRun, bool allowExisting) =>
+        command.SetHandler(async (string repo, int issueId, bool dryRun, bool allowExisting, string? workItemType) =>
         {
             var sync = services.GetRequiredService<ISynchronizer>();
             var gh = services.GetRequiredService<IGitHub>();
 
             var ghIssue = await gh.GetGitHubIssue(repo, issueId);
-            await sync.PullGitHubIssue(ghIssue, dryRun, allowExisting);
-        }, repo, issue, dryRun, allowExisting);
+            await sync.PullGitHubIssue(ghIssue, dryRun, allowExisting, workItemType);
+        }, repo, issue, dryRun, allowExisting, workItemType);
 
         return command;
     }
@@ -155,10 +156,14 @@ class Program
         var issue = new Argument<int>("issue", "ID of the issue to pull into ADO.");
         var dryRun = new Option<bool>("--dry-run", "Don't actually pull the GitHub issue into ADO.");
         var allowExisting = new Option<bool>("--allow-existing", "Allow pulling an issue into ADO, even when a work item or bug already exists for that issue.");
+        var workItemType = new Option<string?>(new [] { "--work-item-type", "-t" }, "The type of work item to create if no work item exists for the issue.")
+        {
+            IsRequired = false
+        };
 
         var rootCommand = new RootCommand
         {
-            PullIssueCommand(repo, issue, dryRun, allowExisting),
+            PullIssueCommand(repo, issue, dryRun, allowExisting, workItemType),
             PullAllIssuesCommand(repo, dryRun, allowExisting),
             GetAdoWorkItemCommand(id),
             FindAdoWorkItemCommand(repo, issue)
