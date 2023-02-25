@@ -5,6 +5,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <RootNamespace>gh_sync</RootNamespace>
     <Nullable>enable</Nullable>
+    <AssemblyName>gh-sync</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
